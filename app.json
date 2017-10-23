@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Gratitude Journal",
-    "icon": "./assets/playstore-icon",
+    "icon": "./assets/playstore-icon.png",
     "version": "0.0.1",
     "slug": "gratitude-journal",
     "sdkVersion": "21.0.0",
@@ -9,7 +9,7 @@
       "backgroundColor": "#000000"
     },
     "android": {
-      "package" : "com."
+      "package" : "com.spencerds.gratitude"
     }
   }
 }
