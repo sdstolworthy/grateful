@@ -4,15 +4,21 @@ import { Container, Header, Input, Title, Left, Icon, Right, Button, Body, Conte
 import { Constants } from 'expo'
 import { signInWithGoogleAsync } from './service'
 import StatusBumper from '../../components/StatusBumper'
-export default class HomeScreen extends React.Component {
+import { connect } from 'react-redux'
+class HomeScreen extends React.Component {
   static navigationOptions = {
-    headerStyle: { paddingTop: 50 }
+    headerStyle: { paddingTop: 50 },
+    title: 'Home'
+  }
+  login = () => {
+    signInWithGoogleAsync().then(()=>{
+      this.props.navigation.navigate('Journal')
+    })
   }
   render () {
     console.log(Constants.statusBarHeight)
     return (
       <Container >
-        {<StatusBumper />}
         <Header paddingTop={Constants.statusBarHeight} androidStatusBarColor="black">
           <Left />
           <Body>
@@ -20,18 +26,12 @@ export default class HomeScreen extends React.Component {
           </Body>
           <Right />
         </Header>
-          {/* <Item style={{paddingHorizontal:10}}>
-            <Icon active name="md-person" />
-            <Input placeholder="Username" />
-          </Item>
-          <Item style={{paddingHorizontal:10}}>
-            <Icon active name="key" />
-            <Input secureTextEntry placeholder="Password" />
-          </Item> */}
-          <Button onPress={signInWithGoogleAsync}>
+          <Button onPress={this.login}>
             <Text>Click me</Text>
           </Button>
       </Container>
     );
   }
 }
+
+export default connect(()=>({}),{})(HomeScreen)
