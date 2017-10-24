@@ -12,11 +12,10 @@ class HomeScreen extends React.Component {
   }
   login = () => {
     signInWithGoogleAsync().then(()=>{
-      this.props.navigation.navigate('Journal')
+      this.props.navigation.navigate('Journal', {})
     })
   }
   render () {
-    console.log(Constants.statusBarHeight)
     return (
       <Container >
         <Header paddingTop={Constants.statusBarHeight} androidStatusBarColor="black">

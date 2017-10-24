@@ -12,7 +12,7 @@ import { setJournalEntries } from './src/redux/actions/journal-actions'
 
 export const db = Expo.SQLite.openDatabase({ name: 'test7.db' })
 
-let store = createStore(
+export const store = createStore(
   GratitudeJournal,
   {},
   compose(applyMiddleware(thunkMiddleware)),
@@ -46,12 +46,12 @@ export default class AwesomeApp extends Component {
       )
       if (__DEV__){
         console.log('develop')
-        // for (let x = 0; x < 13; x++) {
-        //   const entry = 'test entry'
-        //   const time = 1469307752000
-        //   const month = 3099752000
-        //   tx.executeSql('insert into entries (entry, date) select ?, ? where not exists(select 1 from entries where date = ?)', [entry, time + (month * x), time + (month * x)])
-        // }
+        for (let x = 0; x < 13; x++) {
+          const entry = 'test entry'
+          const time = 1469307752000
+          const month = 3099752000
+          tx.executeSql('insert into entries (entry, date) select ?, ? where not exists(select 1 from entries where date = ?)', [entry, time + (month * x), time + (month * x)])
+        }
       }
       tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))

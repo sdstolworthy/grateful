@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {Icon} from 'native-base'
+import { Icon } from 'native-base'
 import {
   ScrollView,
   View,
@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Dimensions
 } from 'react-native'
-import {Octicons} from '@expo/vector-icons'
+import { Octicons } from '@expo/vector-icons'
 import StatusBumper from '../../components/StatusBumper'
 import moment from 'moment'
 import { db } from '../../../App'
@@ -25,7 +25,7 @@ class JournalFeed extends Component {
       text: '',
       sortedDates: {},
     }
-    groupedByMonth = {}
+    this.groupedByMonth = {}
   }
 
   componentDidMount () {
@@ -33,46 +33,62 @@ class JournalFeed extends Component {
       tx.executeSql(
         'create table if not exists entries (id integer primary key not null, date text, entry text);'
       )
-      tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
-
-        //this.props.setEntries(_array)
-      })
     })
     this.sortEntries()
   }
   componentWillReceiveProps (props) {
-    this.sortEntries()
+    this.sortEntries(props)
   }
-  sortEntries () {
+  sortEntries (props = this.props) {
     this.groupedByMonth = {}
-    this.props.entries.sort((a, b) => b.date - a.date).map(this.groupByMonth)
+    props.entries.sort((a, b) => b.date - a.date).map(this.groupByDate)
     this.setState({ sortedDates: this.groupedByMonth })
   }
   createEntry = () => {
-    this.props.navigation.navigate('Prompt')
+    this.props.navigation.navigate('Prompt', {})
   }
-  groupByMonth = (value, index, array) => {
-    d = moment(parseInt(value.date))
-    d = d.format('MMMM YYYY')
-    this.groupedByMonth[d] = this.groupedByMonth[d] || []
-    this.groupedByMonth[d].push(value)
+  groupByDate = (value, index, array) => {
+    let date = moment(parseInt(value.date))
+    let month = date.format('MMMM YYYY')
+    let day = date.format('dddd, MMMM D')
+    this.groupedByMonth[month] = this.groupedByMonth[month] || []
+    this.groupedByMonth[month][day] = this.groupedByMonth[month][day] || []
+    this.groupedByMonth[month][day].push(value)
   }
   handleTextChange = (value) => {
     this.setState({ text: value })
+  }
+  editEntry = (value) => {
+    this.props.navigation.navigate('Prompt', {entry: value})
   }
   styles = StyleSheet.create({
     bodyText: {
       color: '#F5F3BB',
       fontSize: 18,
+      textAlign: 'center'
     },
     headerText: {
       fontWeight: 'bold',
-      fontSize: 25,
+      fontSize: 22,
+      textAlign: 'center',
       fontFamily: 'quicksand',
       color: '#F5F3BB',
+      marginBottom: 3
+    },
+    monthHeader: {
+      textShadowColor: '#211412',
+      marginBottom: 7,
+      textShadowOffset: { width: 2, height: 2 },
+      fontSize: 30,
+      color: 'orange',
+      fontWeight: 'bold',
+      textAlign: 'center',
+    },
+    monthGroup: {
+      marginBottom: 20
     },
     innerView: {
-      paddingHorizontal: 15,
+      // flex:1,
     },
     card: {
       marginBottom: 20
@@ -96,31 +112,46 @@ class JournalFeed extends Component {
   })
   render () {
     let { sortedDates } = this.state
-    let entryCards = sortedDates ? Object.keys(sortedDates).map((value, index) => {
-      return sortedDates[value].map((value, index) => {
+    let entryCards = Object.keys(sortedDates).length > 0
+      ? Object.keys(sortedDates).map((month, index) => {
+        const childCards = Object.keys(sortedDates[month]).map((day, idx) => {
+          let finalEntries = sortedDates[month][day].map((value, i) => {
+            return (
+              <TouchableOpacity key={i} style={this.styles.card} onPress={()=>this.editEntry(value)}>
+                <View>
+                  <Text style={[this.styles.bodyText]}>{value.entry}</Text>
+                </View>
+              </TouchableOpacity>
+            )
+          })
+          return (
+            <View key={idx}>
+              <Text style={this.styles.headerText}>{day}</Text>
+              {finalEntries}
+            </View>
+          )
+        })
         return (
-          <View key={index} style={this.styles.card}>
-            <View >
-              <Text style={this.styles.headerText}>{moment(parseInt(value.date)).format('dddd, MMMM D, YYYY')}</Text>
-            </View>
-            <View>
-              <Text style={this.styles.bodyText}>{value.entry}</Text>
-            </View>
+          <View style={this.styles.monthGroup} key={index}>
+            <Text style={this.styles.monthHeader}>{month}</Text>
+            {childCards}
           </View>
         )
+
       })
-    }) : null
+      : (
+        <Text style={this.styles.bodyText}>Once you have a journal entry, it will appear here</Text>
+      )
     return (
       <Background>
         <ScrollView
           contentContainerStyle={this.styles.innerView}
         >
           <View>
-            <TouchableOpacity onPress={this.createEntry}><Text>CreateEntry</Text></TouchableOpacity>
             {entryCards}
           </View>
         </ScrollView>
-        <TouchableOpacity style={this.styles.editButton}>
+        <TouchableOpacity onPress={this.createEntry} style={this.styles.editButton}>
           <Octicons name='pencil' style={this.styles.editIcon} />
         </TouchableOpacity>
       </Background>

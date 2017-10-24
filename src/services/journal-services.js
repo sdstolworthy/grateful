@@ -1,24 +1,59 @@
-import {db} from '../../App'
-import {dispatch} from 'react-redux'
-import {setJournalEntries} from '../redux/actions/journal-actions'
-export function getEntries() {
+import { db, store } from '../../App'
+import { dispatch } from 'react-redux'
+import { setJournalEntries } from '../redux/actions/journal-actions'
+
+export function getEntries () {
   db.transaction(tx => {
     tx.executeSql('create table if not exists entries (id integer primary key not null, date text, entry text);')
     tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
-      dispatch(setJournalEntries(_array))
+      return _array
     })
   })
 }
-export function addEntry(entry) {
+export function addEntry (entry) {
   if (!entry) {
     return
   }
   const date = (new Date).getTime().toString()
-  db.transaction(tx => {
-    tx.executeSql(`insert into entries (entry, date) values (?,?)`, [entry, date])
-    tx.executeSql(`select * from entries`, [], (_, {rows: {_array}}) => {
-      dispatch(setJournalEntries(_array))
+  let arr = null
+  try {
+    db.transaction(tx => {
+      tx.executeSql(`insert into entries (entry, date) values (?,?)`, [entry, date])
+      tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
+        store.dispatch(setJournalEntries(_array))
+      })
     })
-  })
+  } catch (e) {
+    console.log(e)
+  }
 }
-
+export function editEntry (entry, gratitude) {
+  if (!entry) {
+    return
+  }
+  try {
+    db.transaction(tx => {
+      tx.executeSql('UPDATE ENTRIES SET ENTRY = ? WHERE ID = ?', [gratitude, entry.id])
+      tx.executeSql('select * from entries', [], (_, { rows: { _array } }) => {
+        store.dispatch(setJournalEntries(_array))
+      })
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+export function deleteEntry (entry) {
+  if (!entry) {
+    return
+  }
+  try {
+    db.transaction(tx => {
+      tx.executeSql('DELETE FROM ENTRIES WHERE ID = ?', [entry.id])
+      tx.executeSql('select * from entries', [], (_, { rows: { _array } }) => {
+        store.dispatch(setJournalEntries(_array))
+      })
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
