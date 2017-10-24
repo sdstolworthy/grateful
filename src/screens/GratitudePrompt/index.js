@@ -51,6 +51,9 @@ class GratitudePrompt extends Component {
     input: {
       color: '#F5F3BB',
       fontSize: 27,
+      backgroundColor: 'rgba(0,0,0,.3)',
+      borderRadius: 5,
+      padding: 8,
     },
     innerView: {
       flexDirection: 'column',

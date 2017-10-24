@@ -45,13 +45,6 @@ export default class AwesomeApp extends Component {
         'create table if not exists entries (id integer primary key not null, date text, entry text);'
       )
       if (__DEV__){
-        console.log('develop')
-        for (let x = 0; x < 13; x++) {
-          const entry = 'test entry'
-          const time = 1469307752000
-          const month = 3099752000
-          tx.executeSql('insert into entries (entry, date) select ?, ? where not exists(select 1 from entries where date = ?)', [entry, time + (month * x), time + (month * x)])
-        }
       }
       tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))

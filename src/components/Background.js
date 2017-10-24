@@ -11,8 +11,6 @@ styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: 'blue',
-    justifyContent: 'center',
-    alignItems: 'center'
   },
 })
 export const Background = ({ children }) => {

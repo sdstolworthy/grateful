@@ -88,7 +88,9 @@ class JournalFeed extends Component {
       marginBottom: 20
     },
     innerView: {
-      // flex:1,
+      alignSelf: 'flex-start',
+      paddingTop: 10,
+      paddingHorizontal: 10,
     },
     card: {
       marginBottom: 20
@@ -108,7 +110,7 @@ class JournalFeed extends Component {
     editIcon: {
       color: 'white',
       fontSize: 30,
-    }
+    },
   })
   render () {
     let { sortedDates } = this.state
@@ -145,6 +147,7 @@ class JournalFeed extends Component {
     return (
       <Background>
         <ScrollView
+          style={this.styles.scroll}
           contentContainerStyle={this.styles.innerView}
         >
           <View>
