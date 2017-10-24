@@ -1,8 +1,8 @@
 import React, {
   Component
 } from "react";
-import HomeScreen from "./HomeScreen/HomeScreen";
-import JournalFeed from './JournalFeed/JournalFeed'
+import HomeScreen from "./HomeScreen";
+import JournalFeed from './JournalFeed'
 import SideBar from "../components/SideBar.js";
 import GratitudePrompt from '../screens/GratitudePrompt'
 import {

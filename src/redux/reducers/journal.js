@@ -1,4 +1,4 @@
-import {ADD_JOURNAL_ENTRY,SET_JOURNAL_ENTRIES} from './actions'
+import {ADD_JOURNAL_ENTRY,SET_JOURNAL_ENTRIES} from '../actions/journal-actions'
 
 const initialState = {
   entries: [],

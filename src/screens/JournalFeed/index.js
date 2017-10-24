@@ -13,7 +13,7 @@ import StatusBumper from '../../components/StatusBumper'
 import moment from 'moment'
 import { db } from '../../../App'
 import { connect, dispatch } from 'react-redux'
-import { setJournalEntries } from './actions'
+import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { Background } from '../../components/Background'
 
 class JournalFeed extends Component {

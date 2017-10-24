@@ -14,8 +14,9 @@ import { Icon } from 'native-base'
 import { LinearGradient } from 'expo'
 import { db } from '../../../App'
 import { connect, dispatch } from 'react-redux'
-import {setJournalEntries} from '../JournalFeed/actions'
+import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
+import { addEntry } from '../../services/journal-services'
 
 class GratitudePrompt extends Component {
   constructor (props) {
@@ -45,7 +46,6 @@ class GratitudePrompt extends Component {
       marginBottom: 200,
       flex: 1,
       justifyContent: 'center',
-      // alignItems: 'center'
     },
     input: {
       color: '#F5F3BB',
@@ -65,26 +65,14 @@ class GratitudePrompt extends Component {
       margin: 20,
     }
   })
-  componentDidUpdate() {
+  componentDidUpdate () {
     this.toggleKeyboard()
   }
-  createEntry = (e) => {
-    if (!this.state.gratitude || this.state.gratitude === '') {
-      return
-    }
-    const date = (new Date).getTime().toString()
-    db.transaction(tx => {
-      tx.executeSql(`insert into entries (entry, date) values (?,?)`, [e, date])
-      tx.executeSql(`select * from entries`, [], (_, {rows: {_array}}) => {
-        this.props.setJournalEntries(_array)
-      })
-    })
-  }
   handleTextChange = (e) => {
-    this.setState({gratitude: e})
+    this.setState({ gratitude: e })
   }
   submit = () => {
-    this.createEntry(this.state.gratitude)
+    addEntry(this.state.gratitude)
     this.props.navigation.navigate("Journal")
   }
   handleTextFieldChange = ({ nativeEvent: { contentSize: { width, height } } }) => {
@@ -112,8 +100,8 @@ class GratitudePrompt extends Component {
               ref={c => this.input = c}
               autoCorrect={true}
               multiline={true}
-              onBlur={()=>this.setState({focused:false})}
-              onFocus={()=>{this.setState({focused:true})}}
+              onBlur={() => this.setState({ focused: false })}
+              onFocus={() => { this.setState({ focused: true }) }}
               style={[this.styles.input, { height: this.state.inputHeight }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
@@ -130,15 +118,15 @@ class GratitudePrompt extends Component {
   }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
   return {
     entries: state.entries
   }
 }
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps (dispatch) {
   return {
     setJournalEntries: (entries) => dispatch(setJournalEntries(entries))
   }
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(GratitudePrompt)
+export default connect(mapStateToProps, mapDispatchToProps)(GratitudePrompt)

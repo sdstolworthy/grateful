@@ -1,3 +1,3 @@
 import {combineReducers} from 'redux'
-import Journals from './src/screens/JournalFeed/reducer'
+import Journals from './journal'
 export default combineReducers({Journals})

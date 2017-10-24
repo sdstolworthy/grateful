@@ -5,12 +5,12 @@ import { Provider } from 'react-redux'
 import { createStore, applyMiddleware, compose } from 'redux'
 import thunkMiddleware from 'redux-thunk'
 import firebase from 'firebase'
-import GratitudeJournal from './reducers'
-import {loginFromStorage} from './src/screens/HomeScreen/service'
+import GratitudeJournal from './src/redux/reducers'
+import { loginFromStorage } from './src/services/auth-service'
 import { NavigationActions } from 'react-navigation'
-import {setJournalEntries} from './src/screens/JournalFeed/actions'
+import { setJournalEntries } from './src/redux/actions/journal-actions'
 
-export const db = Expo.SQLite.openDatabase({name: 'test7.db'})
+export const db = Expo.SQLite.openDatabase({ name: 'test7.db' })
 
 let store = createStore(
   GratitudeJournal,
@@ -44,13 +44,16 @@ export default class AwesomeApp extends Component {
       tx.executeSql(
         'create table if not exists entries (id integer primary key not null, date text, entry text);'
       )
-      for(let x = 0; x < 13; x++){
-        const entry = 'test entry'
-        const time = 1469307752000
-        const month = 3099752000
-        tx.executeSql('insert into entries (entry, date) select ?, ? where not exists(select 1 from entries where date = ?)',[entry, time + (month*x), time + (month*x)])
+      if (__DEV__){
+        console.log('develop')
+        // for (let x = 0; x < 13; x++) {
+        //   const entry = 'test entry'
+        //   const time = 1469307752000
+        //   const month = 3099752000
+        //   tx.executeSql('insert into entries (entry, date) select ?, ? where not exists(select 1 from entries where date = ?)', [entry, time + (month * x), time + (month * x)])
+        // }
       }
-      tx.executeSql(`select * from entries`, [], (_, {rows: {_array}}) => {
+      tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))
       })
     })

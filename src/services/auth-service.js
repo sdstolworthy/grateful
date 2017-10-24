@@ -1,6 +1,6 @@
 import Expo from 'expo'
 import firebase from 'firebase'
-import * as secrets from '../../../secrets.json'
+import * as secrets from '../../secrets.json'
 import { AsyncStorage } from 'react-native'
 
 const USER_REF = '/TEST-users/'

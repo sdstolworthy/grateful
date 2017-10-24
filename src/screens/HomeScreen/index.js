@@ -2,7 +2,7 @@ import React from "react";
 import { StatusBar, View } from "react-native";
 import { Container, Header, Input, Title, Left, Icon, Right, Button, Body, Content, Text, Card, CardItem, Item } from "native-base";
 import { Constants } from 'expo'
-import { signInWithGoogleAsync } from './service'
+import { signInWithGoogleAsync } from '../../services/auth-service'
 import StatusBumper from '../../components/StatusBumper'
 import { connect } from 'react-redux'
 class HomeScreen extends React.Component {
