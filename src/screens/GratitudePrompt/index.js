@@ -63,7 +63,7 @@ class GratitudePrompt extends Component {
       color: '#F5F3BB',
       fontSize: 50,
       alignSelf: 'flex-end',
-      margin: 20,
+      padding: 30,
     },
     headerBar: {
       height: 70,
@@ -165,9 +165,11 @@ class GratitudePrompt extends Component {
               value={this.state.gratitude}
             />
           </View>
-          <TouchableOpacity onPress={this.submit}>
-            <Icon name='arrow-forward' style={this.styles.arrowIcon} />
-          </TouchableOpacity>
+          <View style={{flexDirection: 'row', justifyContent:'flex-end'}}>
+            <TouchableOpacity onPress={this.submit}>
+              <Icon name='arrow-forward' style={this.styles.arrowIcon} />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </LinearGradient >
     )

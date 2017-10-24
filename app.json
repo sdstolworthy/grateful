@@ -1,16 +1,19 @@
 {
   "expo": {
-    "name": "Gratitude Journal",
+    "name": "Grateful: Give Thanks Daily",
     "icon": "./assets/playstore-icon.png",
     "version": "0.0.2",
     "slug": "gratitude-journal",
     "sdkVersion": "21.0.0",
-    "versionCode": 2,
     "androidStatusBar": {
       "backgroundColor": "#000000"
     },
     "android": {
+      "versionCode": 2,
       "package" : "com.spencerds.gratitude"
+    },
+    "ios": {
+      "bundleIdentifier": "com.spencerds.gratitude"
     }
   }
 }

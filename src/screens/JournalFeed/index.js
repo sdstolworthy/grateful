@@ -88,7 +88,7 @@ class JournalFeed extends Component {
       marginBottom: 20
     },
     innerView: {
-      alignSelf: 'flex-start',
+      alignSelf: 'center',
       paddingTop: 10,
       paddingHorizontal: 10,
     },
