@@ -11,7 +11,7 @@ class HomeScreen extends React.Component {
     title: 'Home'
   }
   login = () => {
-    signInWithGoogleAsync().then(()=>{
+    signInWithGoogleAsync().then(() => {
       this.props.navigation.navigate('Journal', {})
     })
   }
@@ -25,12 +25,12 @@ class HomeScreen extends React.Component {
           </Body>
           <Right />
         </Header>
-          <Button onPress={this.login}>
-            <Text>Click me</Text>
-          </Button>
+        <Button onPress={this.login}>
+          <Text>Click me</Text>
+        </Button>
       </Container>
     );
   }
 }
 
-export default connect(()=>({}),{})(HomeScreen)
+export default connect(() => ({}), {})(HomeScreen)

@@ -10,7 +10,6 @@ styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: 'blue',
   },
 })
 export const Background = ({ children }) => {

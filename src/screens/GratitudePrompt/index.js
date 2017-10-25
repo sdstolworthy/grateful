@@ -17,7 +17,7 @@ import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
-import { Octicons } from '@expo/vector-icons'
+import { Octicons, Entypo } from '@expo/vector-icons'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -32,7 +32,6 @@ class GratitudePrompt extends Component {
     container: {
       flex: 1,
       flexDirection: 'column',
-      backgroundColor: 'blue',
       justifyContent: 'center',
       alignItems: 'center'
     },
@@ -59,7 +58,7 @@ class GratitudePrompt extends Component {
       flexDirection: 'column',
       flexGrow: 1,
     },
-    arrowIcon: {
+    bottomIcon: {
       color: '#F5F3BB',
       fontSize: 50,
       alignSelf: 'flex-end',
@@ -165,9 +164,12 @@ class GratitudePrompt extends Component {
               value={this.state.gratitude}
             />
           </View>
-          <View style={{flexDirection: 'row', justifyContent:'flex-end'}}>
-            <TouchableOpacity onPress={this.submit}>
-              <Icon name='arrow-forward' style={this.styles.arrowIcon} />
+          <View style={{flexDirection: 'row', justifyContent:'center'}}>
+            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'flex-start', justifyContent:'flex-start'}} onPress={()=>{}}>
+              <Entypo name='dots-three-horizontal' style={this.styles.bottomIcon} />
+            </TouchableOpacity>
+            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'flex-end',justifyContent:'flex-end'}} onPress={this.submit}>
+              <Icon name='arrow-forward' style={this.styles.bottomIcon} />
             </TouchableOpacity>
           </View>
         </ScrollView>
