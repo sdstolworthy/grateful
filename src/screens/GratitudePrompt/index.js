@@ -8,7 +8,9 @@ import {
   Keyboard,
   Dimensions,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  DatePickerAndroid,
+  DatePickerIOS
 } from 'react-native'
 import { Icon } from 'native-base'
 import { LinearGradient } from 'expo'
@@ -18,6 +20,8 @@ import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
 import { Octicons, Entypo, MaterialIcons } from '@expo/vector-icons'
+import DatePicker from 'react-native-datepicker'
+import moment from 'moment'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -27,6 +31,7 @@ class GratitudePrompt extends Component {
       focused: false,
       entry: {}
     }
+    this.selectDate = this.selectDate.bind(this)
   }
   styles = StyleSheet.create({
     container: {
@@ -50,7 +55,7 @@ class GratitudePrompt extends Component {
     input: {
       color: 'white',
       fontSize: 22,
-      backgroundColor: 'rgba(0,0,0,.3)',
+      backgroundColor: 'rgba(255,255,255,0.2)',
       borderRadius: 5,
       padding: 10,
       margin: 15,
@@ -86,9 +91,6 @@ class GratitudePrompt extends Component {
     this.props.navigation.state.params = {}
     Keyboard.dismiss()
   }
-  componentWillReceiveProps (props) {
-
-  }
   componentDidUpdate () {
     this.toggleKeyboard()
   }
@@ -96,9 +98,10 @@ class GratitudePrompt extends Component {
     this.setState({ gratitude: e })
   }
   submit = () => {
-    const { entry } = this.state
+    let entry = Object.assign({}, this.state.entry)
     if (Object.keys(entry).length > 0) {
-      editEntry(entry, this.state.gratitude)
+      entry.entry = this.state.gratitude
+      editEntry(entry)
     } else {
       addEntry(this.state.gratitude)
     }
@@ -117,12 +120,20 @@ class GratitudePrompt extends Component {
   }
   toggleKeyboard = () => {
   }
+  async selectDate () {
+    const { action, year, month, day } = await DatePickerAndroid.open({
+      date: new Date(parseInt(this.state.entry.date))
+    })
+    let entry = Object.assign({}, this.state.entry)
+    entry.date = moment(`${year}${month + 1}${day}`).valueOf().toString()
+    editEntry(entry)
+  }
   render () {
     const { entry } = this.state
     const { screen: screenHeight } = Dimensions.get('window')
     const buttons = [
       (
-        <TouchableOpacity key={'cal'} style={this.styles.headerButton}>
+        <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
           <Octicons name='calendar' style={this.styles.headerIcons} />
         </TouchableOpacity>
       ),(

@@ -27,14 +27,15 @@ export function addEntry (entry) {
     console.log(e)
   }
 }
-export function editEntry (entry, gratitude) {
+export function editEntry (entry) {
   if (!entry) {
     return
   }
   try {
     db.transaction(tx => {
-      tx.executeSql('UPDATE ENTRIES SET ENTRY = ? WHERE ID = ?', [gratitude, entry.id])
+      tx.executeSql('UPDATE ENTRIES SET ENTRY = ?, DATE = ? WHERE ID = ?', [entry.entry, entry.date, entry.id])
       tx.executeSql('select * from entries', [], (_, { rows: { _array } }) => {
+        console.warn(JSON.stringify(_array,null,2))
         store.dispatch(setJournalEntries(_array))
       })
     })

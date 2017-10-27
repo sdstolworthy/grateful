@@ -9,7 +9,7 @@ import GratitudeJournal from './src/redux/reducers'
 import { loginFromStorage } from './src/services/auth-service'
 import { NavigationActions } from 'react-navigation'
 import { setJournalEntries } from './src/redux/actions/journal-actions'
-
+import LoadingScreen from './src/components/LoadingScreen'
 export const db = Expo.SQLite.openDatabase({ name: 'test7.db' })
 
 export const store = createStore(
@@ -61,7 +61,7 @@ export default class AwesomeApp extends Component {
 
   render () {
     if (!this.state.isReady) {
-      return <Expo.AppLoading />;
+      return <LoadingScreen />;
     }
 
     return (

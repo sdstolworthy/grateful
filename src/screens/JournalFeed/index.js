@@ -18,8 +18,6 @@ import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { Background } from '../../components/Background'
 import { LinearGradient } from 'expo'
 
-// import SearchInput, { createFilter } from 'react-native-search-filter'
-
 class JournalFeed extends Component {
 
   constructor (props) {
@@ -42,6 +40,7 @@ class JournalFeed extends Component {
     this.sortEntries()
   }
   componentWillReceiveProps (props) {
+    this.setState({sortedDates: {}})
     this.sortEntries(props)
   }
   searchEntries = (e) => {
