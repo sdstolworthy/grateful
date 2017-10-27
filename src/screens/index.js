@@ -25,6 +25,6 @@ const HomeScreenRouter = DrawerNavigator({
   }
 }, {
   // contentComponent: props => < SideBar { ...props }/>
-  // contentComponent: () => <View/>
+  contentComponent: () => <View/>
 });
 export default HomeScreenRouter;

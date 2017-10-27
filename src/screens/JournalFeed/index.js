@@ -40,8 +40,9 @@ class JournalFeed extends Component {
     this.sortEntries()
   }
   componentWillReceiveProps (props) {
-    this.setState({sortedDates: {}})
-    this.sortEntries(props)
+    this.setState({sortedDates: {}},
+      () => this.sortEntries(props)
+    )
   }
   searchEntries = (e) => {
     const newEntries = this.props.entries.filter(value => {

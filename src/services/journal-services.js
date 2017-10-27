@@ -35,7 +35,6 @@ export function editEntry (entry) {
     db.transaction(tx => {
       tx.executeSql('UPDATE ENTRIES SET ENTRY = ?, DATE = ? WHERE ID = ?', [entry.entry, entry.date, entry.id])
       tx.executeSql('select * from entries', [], (_, { rows: { _array } }) => {
-        console.warn(JSON.stringify(_array,null,2))
         store.dispatch(setJournalEntries(_array))
       })
     })

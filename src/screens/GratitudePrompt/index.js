@@ -20,7 +20,6 @@ import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
 import { Octicons, Entypo, MaterialIcons } from '@expo/vector-icons'
-import DatePicker from 'react-native-datepicker'
 import moment from 'moment'
 class GratitudePrompt extends Component {
   constructor (props) {
@@ -99,6 +98,7 @@ class GratitudePrompt extends Component {
   }
   submit = () => {
     let entry = Object.assign({}, this.state.entry)
+
     if (Object.keys(entry).length > 0) {
       entry.entry = this.state.gratitude
       editEntry(entry)
@@ -126,7 +126,13 @@ class GratitudePrompt extends Component {
     })
     let entry = Object.assign({}, this.state.entry)
     entry.date = moment(`${year}${month + 1}${day}`).valueOf().toString()
-    editEntry(entry)
+    this.setState(
+      {
+        entry: {
+          ...entry,
+          date: entry.date
+        }
+      }, () => editEntry(entry))
   }
   render () {
     const { entry } = this.state
@@ -136,7 +142,7 @@ class GratitudePrompt extends Component {
         <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
           <Octicons name='calendar' style={this.styles.headerIcons} />
         </TouchableOpacity>
-      ),(
+      ), (
         <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.deleteEntry(entry)}>
           <Octicons name='trashcan' style={this.styles.headerIcons} />
         </TouchableOpacity>
@@ -170,11 +176,11 @@ class GratitudePrompt extends Component {
               value={this.state.gratitude}
             />
           </View>
-          <View style={{flexDirection: 'row', justifyContent:'center'}}>
-            <View style={{flex:1, flexDirection:'row',alignItems:'center', justifyContent:'flex-start'}}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
               {Object.keys(entry).length > 0 ? buttons : <View />}
             </View>
-            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'center',justifyContent:'flex-end'}} onPress={this.submit}>
+            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
               <MaterialIcons name='check' style={this.styles.bottomIcon} />
             </TouchableOpacity>
           </View>
