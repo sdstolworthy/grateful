@@ -37,7 +37,11 @@ export default class AwesomeApp extends Component {
       Roboto: require("native-base/Fonts/Roboto.ttf"),
       Roboto_medium: require("native-base/Fonts/Roboto_medium.ttf"),
       Ionicons: require("native-base/Fonts/Ionicons.ttf"),
-      'quicksand': require("./assets/Quicksand-Regular.ttf")
+      Quicksand: require("./assets/fonts/Quicksand-Regular.ttf"),
+      Raleway: require('./assets/fonts/Raleway-Regular.ttf'),
+      RalewaySemiBold: require('./assets/fonts/Raleway-SemiBold.ttf'),
+      RalewayLight: require('./assets/fonts/Raleway-Light.ttf'),
+      Lato: require('./assets/fonts/Lato-Regular.ttf'),
     });
     this.setState({ isReady: true });
     db.transaction(tx => {

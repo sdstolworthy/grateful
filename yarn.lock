@@ -2408,6 +2408,10 @@ function-bind@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
 
+fuse.js@^3.0.5:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-3.2.0.tgz#f0448e8069855bf2a3e683cdc1d320e7e2a07ef4"
+
 gauge@~1.2.5:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/gauge/-/gauge-1.2.7.tgz#e9cec5483d3d4ee0ef44b60a7d99e4935e136d93"
@@ -4776,6 +4780,13 @@ react-native-scripts@1.5.0:
     qrcode-terminal "^0.11.0"
     rimraf "^2.6.1"
     xdl "45.0.0"
+
+react-native-search-filter@^0.1.1, react-native-search-filter@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/react-native-search-filter/-/react-native-search-filter-0.1.2.tgz#73f2114eff3812fe64edc6055139e6c93eba6ccc"
+  dependencies:
+    fuse.js "^3.0.5"
+    react-native-search-filter "^0.1.1"
 
 react-native-svg@5.3.0:
   version "5.3.0"

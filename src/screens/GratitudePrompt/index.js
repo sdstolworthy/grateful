@@ -17,7 +17,7 @@ import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
-import { Octicons, Entypo } from '@expo/vector-icons'
+import { Octicons, Entypo, MaterialIcons } from '@expo/vector-icons'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -36,11 +36,11 @@ class GratitudePrompt extends Component {
       alignItems: 'center'
     },
     text: {
-      color: '#F5F3BB',
+      color: 'white',
       fontSize: 27,
       marginBottom: 20,
-      fontFamily: 'quicksand',
-      fontWeight: 'bold',
+      fontFamily: 'RalewaySemiBold',
+      textAlign: 'center',
     },
     formGroup: {
       marginBottom: 200,
@@ -48,32 +48,29 @@ class GratitudePrompt extends Component {
       justifyContent: 'center',
     },
     input: {
-      color: '#F5F3BB',
-      fontSize: 27,
+      color: 'white',
+      fontSize: 22,
       backgroundColor: 'rgba(0,0,0,.3)',
       borderRadius: 5,
-      padding: 8,
+      padding: 10,
+      margin: 15,
+      fontFamily: 'Lato'
     },
     innerView: {
       flexDirection: 'column',
       flexGrow: 1,
     },
     bottomIcon: {
-      color: '#F5F3BB',
+      color: 'white',
       fontSize: 50,
       alignSelf: 'flex-end',
       padding: 30,
     },
-    headerBar: {
-      height: 70,
-      alignSelf: 'flex-end',
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginRight: 15
-    },
     headerIcons: {
-      color: '#F5F3BB',
-      fontSize: 30,
+      color: 'white',
+      alignSelf: 'flex-start',
+      fontSize: 35,
+      marginLeft: 15,
     },
     headerButton: {
       padding: 7
@@ -123,26 +120,24 @@ class GratitudePrompt extends Component {
   render () {
     const { entry } = this.state
     const { screen: screenHeight } = Dimensions.get('window')
-    const buttons = (
-      <View style={this.styles.headerBar}>
-        <TouchableOpacity style={this.styles.headerButton}>
+    const buttons = [
+      (
+        <TouchableOpacity key={'cal'} style={this.styles.headerButton}>
           <Octicons name='calendar' style={this.styles.headerIcons} />
         </TouchableOpacity>
-        <TouchableOpacity style={this.styles.headerButton} onPress={() => this.deleteEntry(entry)}>
+      ),(
+        <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.deleteEntry(entry)}>
           <Octicons name='trashcan' style={this.styles.headerIcons} />
         </TouchableOpacity>
-      </View>
-    )
+      )
+    ]
     return (
       <LinearGradient
-        colors={['#412722', '#5E3831']}
+        colors={['#6882E1', '#1B48ED']}
         start={[.1, .1]}
         end={[.3, 1]}
         style={this.styles.container}
       >
-        <View style={this.styles.headerBar}>
-          {Object.keys(entry).length > 0 ? buttons : <View />}
-        </View>
         <ScrollView
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={this.styles.innerView}
@@ -156,7 +151,7 @@ class GratitudePrompt extends Component {
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
               onFocus={() => { this.setState({ focused: true }) }}
-              style={[this.styles.input, { height: this.state.inputHeight }]}
+              style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
               underlineColorAndroid={`rgba(0,0,0,0)`}
@@ -165,11 +160,11 @@ class GratitudePrompt extends Component {
             />
           </View>
           <View style={{flexDirection: 'row', justifyContent:'center'}}>
-            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'flex-start', justifyContent:'flex-start'}} onPress={()=>{}}>
-              <Entypo name='dots-three-horizontal' style={this.styles.bottomIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'flex-end',justifyContent:'flex-end'}} onPress={this.submit}>
-              <Icon name='arrow-forward' style={this.styles.bottomIcon} />
+            <View style={{flex:1, flexDirection:'row',alignItems:'center', justifyContent:'flex-start'}}>
+              {Object.keys(entry).length > 0 ? buttons : <View />}
+            </View>
+            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'center',justifyContent:'flex-end'}} onPress={this.submit}>
+              <MaterialIcons name='check' style={this.styles.bottomIcon} />
             </TouchableOpacity>
           </View>
         </ScrollView>
