@@ -6,25 +6,23 @@ import HomeScreen from "./HomeScreen";
 import JournalFeed from './JournalFeed'
 import SideBar from "../components/SideBar.js";
 import GratitudePrompt from '../screens/GratitudePrompt'
-import LoadingScreen from '../components/LoadingScreen'
+
 import {
-  DrawerNavigator
+  StackNavigator
 } from "react-navigation";
-const HomeScreenRouter = DrawerNavigator({
+const HomeScreenRouter = StackNavigator({
   Prompt: {
     screen: GratitudePrompt
   },
   Journal: {
     screen: JournalFeed
   },
-  Home: {
-    screen: HomeScreen,
-  },
-  LoadingScreen: {
-    screen: LoadingScreen,
-  }
+  // Home: {
+  //   screen: HomeScreen,
+  // },
 }, {
+  headerMode: 'none',
   // contentComponent: props => < SideBar { ...props }/>
-  contentComponent: () => <View/>
+  // contentComponent: () => <View/>
 });
 export default HomeScreenRouter;

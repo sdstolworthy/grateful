@@ -105,8 +105,10 @@ class JournalFeed extends Component {
       position: 'absolute',
       bottom: 15,
       right: 15,
-      height: 70,
-      width: 70,
+      height: 80,
+      width: 80,
+      justifyContent: 'center',
+      alignItems: 'center'
     },
     editIcon: {
       color: 'white',

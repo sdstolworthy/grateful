@@ -21,6 +21,7 @@ import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
 import { Octicons, Entypo, MaterialIcons } from '@expo/vector-icons'
 import moment from 'moment'
+import ConfirmModal from '../../components/ConfirmModal'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -28,7 +29,8 @@ class GratitudePrompt extends Component {
       inputHeight: 35,
       gratitude: '',
       focused: false,
-      entry: {}
+      entry: {},
+      isVisible: false
     }
     this.selectDate = this.selectDate.bind(this)
   }
@@ -124,15 +126,22 @@ class GratitudePrompt extends Component {
     const { action, year, month, day } = await DatePickerAndroid.open({
       date: new Date(parseInt(this.state.entry.date))
     })
-    let entry = Object.assign({}, this.state.entry)
-    entry.date = moment(`${year}${month + 1}${day}`).valueOf().toString()
-    this.setState(
-      {
-        entry: {
-          ...entry,
-          date: entry.date
-        }
-      }, () => editEntry(entry))
+    if (action !== DatePickerAndroid.dismissedAction) {
+      let entry = Object.assign({}, this.state.entry)
+      const newDate = moment(`${year}-${month + 1}-${day}`, 'YYYY-M-D').valueOf().toString()
+      if (!moment(newDate, 'x').isValid()) {
+        console.error('invalid date!', newDate)
+        return
+      }
+      entry.date = newDate
+      this.setState(
+        {
+          entry: {
+            ...entry,
+            date: entry.date
+          }
+        }, () => editEntry(entry))
+    }
   }
   render () {
     const { entry } = this.state
@@ -143,10 +152,10 @@ class GratitudePrompt extends Component {
           <Octicons name='calendar' style={this.styles.headerIcons} />
         </TouchableOpacity>
       ), (
-        <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.deleteEntry(entry)}>
+        <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.setState({isVisible: true})}>
           <Octicons name='trashcan' style={this.styles.headerIcons} />
         </TouchableOpacity>
-      )
+      ) 
     ]
     return (
       <LinearGradient
@@ -185,6 +194,14 @@ class GratitudePrompt extends Component {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        <ConfirmModal
+          onConfirm={() => this.deleteEntry(entry)}
+          onCancel={() => this.setState({isVisible: false})}
+          isVisible={this.state.isVisible}
+          buttons={['Cancel','Delete']}
+          prompt={'Delete this memory?'}
+          status={'warning'}
+        />
       </LinearGradient >
     )
   }
