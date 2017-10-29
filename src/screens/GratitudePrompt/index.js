@@ -124,7 +124,8 @@ class GratitudePrompt extends Component {
   }
   async selectDate () {
     const { action, year, month, day } = await DatePickerAndroid.open({
-      date: new Date(parseInt(this.state.entry.date))
+      date: new Date(parseInt(this.state.entry.date)),
+      maxDate: Date.now()
     })
     if (action !== DatePickerAndroid.dismissedAction) {
       let entry = Object.assign({}, this.state.entry)
