@@ -6,7 +6,8 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Dimensions
+  Dimensions,
+  TextInput
 } from 'react-native'
 import { Octicons } from '@expo/vector-icons'
 import StatusBumper from '../../components/StatusBumper'
@@ -15,6 +16,7 @@ import { db } from '../../../App'
 import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { Background } from '../../components/Background'
+import { LinearGradient } from 'expo'
 
 class JournalFeed extends Component {
 
@@ -24,8 +26,9 @@ class JournalFeed extends Component {
       entries: [],
       text: '',
       sortedDates: {},
+      searchText: '',
     }
-    this.groupedByMonth = {}
+    this.groupedByDate = {}
   }
 
   componentDidMount () {
@@ -37,43 +40,42 @@ class JournalFeed extends Component {
     this.sortEntries()
   }
   componentWillReceiveProps (props) {
-    this.sortEntries(props)
+    this.setState({sortedDates: {}},
+      () => this.sortEntries(props)
+    )
+  }
+  searchEntries = (e) => {
+    const newEntries = this.props.entries.filter(value => {
+      return value.entry.toLowerCase().indexOf(e.toLowerCase()) > -1
+    })
+    this.sortEntries({entries: newEntries})
   }
   sortEntries (props = this.props) {
-    this.groupedByMonth = {}
+    this.groupedByDate = {}
     props.entries.sort((a, b) => b.date - a.date).map(this.groupByDate)
-    this.setState({ sortedDates: this.groupedByMonth })
+    this.setState({ sortedDates: this.groupedByDate })
   }
   createEntry = () => {
     this.props.navigation.navigate('Prompt', {})
   }
   groupByDate = (value, index, array) => {
     let date = moment(parseInt(value.date))
-    let month = date.format('MMMM YYYY')
-    let day = date.format('dddd, MMMM D')
-    this.groupedByMonth[month] = this.groupedByMonth[month] || []
-    this.groupedByMonth[month][day] = this.groupedByMonth[month][day] || []
-    this.groupedByMonth[month][day].push(value)
+    let day = date.format('YYYY-MM-DD')
+    this.groupedByDate[day] = this.groupedByDate[day] || []
+    this.groupedByDate[day].push(value)
   }
   handleTextChange = (value) => {
     this.setState({ text: value })
   }
   editEntry = (value) => {
-    this.props.navigation.navigate('Prompt', {entry: value})
+    this.props.navigation.navigate('Prompt', { entry: value })
   }
   styles = StyleSheet.create({
-    bodyText: {
-      color: '#F5F3BB',
-      fontSize: 18,
-      textAlign: 'center'
-    },
     headerText: {
-      fontWeight: 'bold',
       fontSize: 22,
       textAlign: 'center',
-      fontFamily: 'quicksand',
-      color: '#F5F3BB',
-      marginBottom: 3
+      fontFamily: 'Lato',
+      color: 'white',
     },
     monthHeader: {
       textShadowColor: '#211412',
@@ -88,18 +90,10 @@ class JournalFeed extends Component {
       marginBottom: 20
     },
     innerView: {
-      alignSelf: 'center',
       paddingTop: 10,
-      paddingHorizontal: 10,
-    },
-    card: {
-      marginBottom: 20
+      paddingHorizontal: 20,
     },
     editButton: {
-      backgroundColor: 'orange',
-      position: 'absolute',
-      bottom: 15,
-      right: 15,
       height: 70,
       width: 70,
       borderRadius: 35,
@@ -107,55 +101,111 @@ class JournalFeed extends Component {
       alignItems: 'center',
       elevation: 5
     },
+    editTouchable: {
+      position: 'absolute',
+      bottom: 15,
+      right: 15,
+      height: 80,
+      width: 80,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
     editIcon: {
       color: 'white',
       fontSize: 30,
     },
+    dateContainer: {
+      marginBottom: 15,
+      flexDirection: 'row'
+    },
+    dateHeaderContainer: {
+      flexDirection: 'column',
+      marginRight: 15,
+    },
+    monthText: {
+      color: 'white',
+      fontFamily: 'Raleway',
+      fontSize: 22,
+      marginTop: 0,
+      marginBottom: -8,
+    },
+    dayText: {
+      color: 'white',
+      fontFamily: 'RalewaySemiBold',
+      fontSize: 35,
+    },
+    entryText: {
+      color: 'white',
+      fontFamily: 'Lato',
+      fontSize: 22,
+    },
+    searchBar: {
+      borderColor: 'rgba(0,0,0,0)',
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      height: 36,
+      borderRadius: 18,
+      paddingHorizontal: 15,
+      marginTop: 15,
+      marginBottom: 25,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    searchInput: {
+      color: 'white',
+      fontFamily: 'RalewayLight',
+      fontSize: 22,
+      flex: 1,
+    }
   })
   render () {
     let { sortedDates } = this.state
-    let entryCards = Object.keys(sortedDates).length > 0
-      ? Object.keys(sortedDates).map((month, index) => {
-        const childCards = Object.keys(sortedDates[month]).map((day, idx) => {
-          let finalEntries = sortedDates[month][day].map((value, i) => {
-            return (
-              <TouchableOpacity key={i} style={this.styles.card} onPress={()=>this.editEntry(value)}>
-                <View>
-                  <Text style={[this.styles.bodyText]}>{value.entry}</Text>
-                </View>
-              </TouchableOpacity>
-            )
-          })
-          return (
-            <View key={idx}>
-              <Text style={this.styles.headerText}>{day}</Text>
-              {finalEntries}
-            </View>
-          )
-        })
+    const entryCards = Object.keys(sortedDates).map((value, index) => {
+      const entriesPerDay = sortedDates[value].map((val, idx) => {
         return (
-          <View style={this.styles.monthGroup} key={index}>
-            <Text style={this.styles.monthHeader}>{month}</Text>
-            {childCards}
-          </View>
+          <TouchableOpacity key={idx}  onPress={() => this.editEntry(val)}>
+            <Text style={this.styles.entryText}>{val.entry}</Text>
+          </TouchableOpacity>
         )
-
       })
-      : (
-        <Text style={this.styles.bodyText}>Once you have a journal entry, it will appear here</Text>
+      return (
+        <View key={index} style={this.styles.dateContainer}>
+          <View style={this.styles.dateHeaderContainer}>
+            <Text style={this.styles.monthText}>{moment(value).format('MMM')}</Text>
+            <Text style={this.styles.dayText}>{moment(value).format('DD')}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            {entriesPerDay}
+          </View>
+        </View>
       )
+    })
     return (
-      <Background>
+      <Background
+        colors={['#6882E1', '#1B48ED']}
+      >
         <ScrollView
           style={this.styles.scroll}
           contentContainerStyle={this.styles.innerView}
         >
-          <View>
-            {entryCards}
+          <View style={this.styles.searchBar}>
+            <TextInput
+              underlineColorAndroid='rgba(0,0,0,0)'
+              onChangeText={this.handleSearch}
+              placeholder='Search'
+              placeholderTextColor='white'
+              style={this.styles.searchInput}
+              onChangeText={this.searchEntries}
+            />
           </View>
+          {entryCards}
         </ScrollView>
-        <TouchableOpacity onPress={this.createEntry} style={this.styles.editButton}>
-          <Octicons name='pencil' style={this.styles.editIcon} />
+        <TouchableOpacity style={this.styles.editTouchable} onPress={this.createEntry}>
+          <LinearGradient
+            colors={['#E16868', '#EF508D']}
+            style={this.styles.editButton}
+          >
+            <Octicons name='pencil' style={this.styles.editIcon} />
+          </LinearGradient>
         </TouchableOpacity>
       </Background>
     )

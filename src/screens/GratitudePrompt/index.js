@@ -8,7 +8,9 @@ import {
   Keyboard,
   Dimensions,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  DatePickerAndroid,
+  DatePickerIOS
 } from 'react-native'
 import { Icon } from 'native-base'
 import { LinearGradient } from 'expo'
@@ -17,7 +19,9 @@ import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
-import { Octicons, Entypo } from '@expo/vector-icons'
+import { Octicons, Entypo, MaterialIcons } from '@expo/vector-icons'
+import moment from 'moment'
+import ConfirmModal from '../../components/ConfirmModal'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -25,8 +29,10 @@ class GratitudePrompt extends Component {
       inputHeight: 35,
       gratitude: '',
       focused: false,
-      entry: {}
+      entry: {},
+      isVisible: false
     }
+    this.selectDate = this.selectDate.bind(this)
   }
   styles = StyleSheet.create({
     container: {
@@ -36,11 +42,11 @@ class GratitudePrompt extends Component {
       alignItems: 'center'
     },
     text: {
-      color: '#F5F3BB',
+      color: 'white',
       fontSize: 27,
       marginBottom: 20,
-      fontFamily: 'quicksand',
-      fontWeight: 'bold',
+      fontFamily: 'RalewaySemiBold',
+      textAlign: 'center',
     },
     formGroup: {
       marginBottom: 200,
@@ -48,39 +54,35 @@ class GratitudePrompt extends Component {
       justifyContent: 'center',
     },
     input: {
-      color: '#F5F3BB',
-      fontSize: 27,
-      backgroundColor: 'rgba(0,0,0,.3)',
+      color: 'white',
+      fontSize: 22,
+      backgroundColor: 'rgba(255,255,255,0.2)',
       borderRadius: 5,
-      padding: 8,
+      padding: 10,
+      margin: 15,
+      fontFamily: 'Lato'
     },
     innerView: {
       flexDirection: 'column',
       flexGrow: 1,
     },
     bottomIcon: {
-      color: '#F5F3BB',
+      color: 'white',
       fontSize: 50,
       alignSelf: 'flex-end',
       padding: 30,
     },
-    headerBar: {
-      height: 70,
-      alignSelf: 'flex-end',
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginRight: 15
-    },
     headerIcons: {
-      color: '#F5F3BB',
-      fontSize: 30,
+      color: 'white',
+      alignSelf: 'flex-start',
+      fontSize: 35,
+      marginLeft: 15,
     },
     headerButton: {
       padding: 7
     }
   })
   componentDidMount () {
-    this.refs.forminput.focus()
     let entry = {}
     try {
       entry = Object.assign({}, this.props.navigation.state.params.entry)
@@ -89,9 +91,6 @@ class GratitudePrompt extends Component {
     this.props.navigation.state.params = {}
     Keyboard.dismiss()
   }
-  componentWillReceiveProps (props) {
-
-  }
   componentDidUpdate () {
     this.toggleKeyboard()
   }
@@ -99,9 +98,11 @@ class GratitudePrompt extends Component {
     this.setState({ gratitude: e })
   }
   submit = () => {
-    const { entry } = this.state
+    let entry = Object.assign({}, this.state.entry)
+
     if (Object.keys(entry).length > 0) {
-      editEntry(entry, this.state.gratitude)
+      entry.entry = this.state.gratitude
+      editEntry(entry)
     } else {
       addEntry(this.state.gratitude)
     }
@@ -120,29 +121,49 @@ class GratitudePrompt extends Component {
   }
   toggleKeyboard = () => {
   }
+  async selectDate () {
+    const { action, year, month, day } = await DatePickerAndroid.open({
+      date: new Date(parseInt(this.state.entry.date)),
+      maxDate: Date.now()
+    })
+    if (action !== DatePickerAndroid.dismissedAction) {
+      let entry = Object.assign({}, this.state.entry)
+      const newDate = moment(`${year}-${month + 1}-${day}`, 'YYYY-M-D').valueOf().toString()
+      if (!moment(newDate, 'x').isValid()) {
+        console.error('invalid date!', newDate)
+        return
+      }
+      entry.date = newDate
+      this.setState(
+        {
+          entry: {
+            ...entry,
+            date: entry.date
+          }
+        }, () => editEntry(entry))
+    }
+  }
   render () {
     const { entry } = this.state
     const { screen: screenHeight } = Dimensions.get('window')
-    const buttons = (
-      <View style={this.styles.headerBar}>
-        <TouchableOpacity style={this.styles.headerButton}>
+    const buttons = [
+      (
+        <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
           <Octicons name='calendar' style={this.styles.headerIcons} />
         </TouchableOpacity>
-        <TouchableOpacity style={this.styles.headerButton} onPress={() => this.deleteEntry(entry)}>
+      ), (
+        <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.setState({isVisible: true})}>
           <Octicons name='trashcan' style={this.styles.headerIcons} />
         </TouchableOpacity>
-      </View>
-    )
+      ) 
+    ]
     return (
       <LinearGradient
-        colors={['#412722', '#5E3831']}
+        colors={['#6882E1', '#1B48ED']}
         start={[.1, .1]}
         end={[.3, 1]}
         style={this.styles.container}
       >
-        <View style={this.styles.headerBar}>
-          {Object.keys(entry).length > 0 ? buttons : <View />}
-        </View>
         <ScrollView
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={this.styles.innerView}
@@ -156,7 +177,7 @@ class GratitudePrompt extends Component {
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
               onFocus={() => { this.setState({ focused: true }) }}
-              style={[this.styles.input, { height: this.state.inputHeight }]}
+              style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
               underlineColorAndroid={`rgba(0,0,0,0)`}
@@ -164,15 +185,23 @@ class GratitudePrompt extends Component {
               value={this.state.gratitude}
             />
           </View>
-          <View style={{flexDirection: 'row', justifyContent:'center'}}>
-            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'flex-start', justifyContent:'flex-start'}} onPress={()=>{}}>
-              <Entypo name='dots-three-horizontal' style={this.styles.bottomIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity style={{flex:1, flexDirection:'row',alignItems:'flex-end',justifyContent:'flex-end'}} onPress={this.submit}>
-              <Icon name='arrow-forward' style={this.styles.bottomIcon} />
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+              {Object.keys(entry).length > 0 ? buttons : <View />}
+            </View>
+            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
+              <MaterialIcons name='check' style={this.styles.bottomIcon} />
             </TouchableOpacity>
           </View>
         </ScrollView>
+        <ConfirmModal
+          onConfirm={() => this.deleteEntry(entry)}
+          onCancel={() => this.setState({isVisible: false})}
+          isVisible={this.state.isVisible}
+          buttons={['Cancel','Delete']}
+          prompt={'Delete this memory?'}
+          status={'warning'}
+        />
       </LinearGradient >
     )
   }

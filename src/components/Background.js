@@ -9,13 +9,12 @@ import {
 styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
   },
 })
-export const Background = ({ children }) => {
+export const Background = ({ children, colors = ['#412722', '#5E3831'] }) => {
   return (
     <LinearGradient
-      colors={['#412722', '#5E3831']}
+      colors={colors}
       start={[.1, .1]}
       end={[.3, 1]}
       style={styles.container}

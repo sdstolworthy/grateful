@@ -9,7 +9,7 @@
       "backgroundColor": "#000000"
     },
     "android": {
-      "versionCode": 3,
+      "versionCode": 5,
       "package" : "com.spencerds.gratitude"
     },
     "ios": {
