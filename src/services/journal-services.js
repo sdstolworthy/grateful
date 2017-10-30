@@ -48,7 +48,7 @@ export async function togglePushEnabled (isEnabled) {
   if (!isEnabled) {
     await Notifications.cancelAllScheduledNotificationsAsync()
   } else {
-    
+
   }
   try {
     db.transaction(tx => {

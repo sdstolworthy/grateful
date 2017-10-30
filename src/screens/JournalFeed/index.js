@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  TextInput
+  TextInput,
+  Animated
 } from 'react-native'
 import { Octicons } from '@expo/vector-icons'
 import StatusBumper from '../../components/StatusBumper'
@@ -27,8 +28,11 @@ class JournalFeed extends Component {
       text: '',
       sortedDates: {},
       searchText: '',
+      editVisible: true,
+      slideAnim: new Animated.Value(15)
     }
     this.groupedByDate = {}
+    this.editButtonVisibleTimeout
   }
 
   componentDidMount () {
@@ -37,10 +41,35 @@ class JournalFeed extends Component {
         'create table if not exists entries (id integer primary key not null, date text, entry text);'
       )
     })
+    this.editButtonVisibleTimeout = setTimeout(this.beginSlideOutAnimation, 2500)
     this.sortEntries()
   }
+  beginSlideOutAnimation = () => {
+    this.setState({ editVisible: false }, () => {
+      Animated.timing(
+        this.state.slideAnim,
+        {
+          toValue: -80,
+          duration: 250
+        }
+      ).start()
+    })
+  }
+  beginSlideInAnimation = () => {
+    if (!this.state.editVisible) {
+      this.setState({ editVisible: true }, () => {
+        Animated.timing(
+          this.state.slideAnim,
+          {
+            toValue: 15,
+            duration: 250
+          }
+        ).start()
+      })
+    }
+  }
   componentWillReceiveProps (props) {
-    this.setState({sortedDates: {}},
+    this.setState({ sortedDates: {} },
       () => this.sortEntries(props)
     )
   }
@@ -48,7 +77,7 @@ class JournalFeed extends Component {
     const newEntries = this.props.entries.filter(value => {
       return value.entry.toLowerCase().indexOf(e.toLowerCase()) > -1
     })
-    this.sortEntries({entries: newEntries})
+    this.sortEntries({ entries: newEntries })
   }
   sortEntries (props = this.props) {
     this.groupedByDate = {}
@@ -56,6 +85,7 @@ class JournalFeed extends Component {
     this.setState({ sortedDates: this.groupedByDate })
   }
   createEntry = () => {
+    clearTimeout(this.editButtonVisibleTimeout)
     this.props.navigation.navigate('Prompt', {})
   }
   groupByDate = (value, index, array) => {
@@ -68,6 +98,7 @@ class JournalFeed extends Component {
     this.setState({ text: value })
   }
   editEntry = (value) => {
+    clearTimeout(this.editButtonVisibleTimeout)
     this.props.navigation.navigate('Prompt', { entry: value })
   }
   styles = StyleSheet.create({
@@ -157,12 +188,18 @@ class JournalFeed extends Component {
       flex: 1,
     }
   })
+
+  setEditButtonVisible = () => {
+    clearTimeout(this.editButtonVisibleTimeout)
+    this.beginSlideInAnimation()
+    this.editButtonVisibleTimeout = setTimeout(this.beginSlideOutAnimation, 2000)
+  }
   render () {
     let { sortedDates } = this.state
     const entryCards = Object.keys(sortedDates).map((value, index) => {
       const entriesPerDay = sortedDates[value].map((val, idx) => {
         return (
-          <TouchableOpacity key={idx}  onPress={() => this.editEntry(val)}>
+          <TouchableOpacity key={idx} onPress={() => this.editEntry(val)}>
             <Text style={this.styles.entryText}>{val.entry}</Text>
           </TouchableOpacity>
         )
@@ -186,6 +223,7 @@ class JournalFeed extends Component {
         <ScrollView
           style={this.styles.scroll}
           contentContainerStyle={this.styles.innerView}
+          onTouchStart={this.setEditButtonVisible}
         >
           <View style={this.styles.searchBar}>
             <TextInput
@@ -199,14 +237,16 @@ class JournalFeed extends Component {
           </View>
           {entryCards}
         </ScrollView>
-        <TouchableOpacity style={this.styles.editTouchable} onPress={this.createEntry}>
-          <LinearGradient
-            colors={['#E16868', '#EF508D']}
-            style={this.styles.editButton}
-          >
-            <Octicons name='pencil' style={this.styles.editIcon} />
-          </LinearGradient>
-        </TouchableOpacity>
+        <Animated.View style={[this.styles.editTouchable, { bottom: this.state.slideAnim }]} onPress={this.createEntry}>
+          <TouchableOpacity onPress={this.createEntry}>
+            <LinearGradient
+              colors={['#E16868', '#EF508D']}
+              style={this.styles.editButton}
+            >
+              <Octicons name='pencil' style={this.styles.editIcon} />
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
       </Background>
     )
   }

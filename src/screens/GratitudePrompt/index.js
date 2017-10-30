@@ -168,46 +168,48 @@ class GratitudePrompt extends Component {
         style={this.styles.container}
       >
         <ScrollView
+          ref='parentScrollView'
           keyboardShouldPersistTaps={'handled'}
           contentContainerStyle={this.styles.innerView}
           onPress={this.toggleKeyboard}
+          onContentSizeChange={(contentWidth, contentHeight) => { this.refs.parentScrollView.scrollToEnd(true)}}
         >
-          <View style={[this.styles.formGroup, {paddingTop: screenHeight / 5}]}>
-            <Text style={this.styles.text}>What are you grateful for today?</Text>
-            <TextInput
-              ref='forminput'
-              autoCorrect={true}
-              multiline={true}
-              onBlur={() => this.setState({ focused: false })}
-              onFocus={() => { this.setState({ focused: true }) }}
-              style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
-              autoCapitalize={'sentences'}
-              onChangeText={this.handleTextChange}
-              underlineColorAndroid={`rgba(0,0,0,0)`}
-              onContentSizeChange={this.handleTextFieldChange}
-              value={this.state.gratitude}
-            />
-          </View>
-        </ScrollView>
-        <View style={this.styles.buttonContainer}>
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-            <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
-              <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
-            </TouchableOpacity>
-            {Object.keys(entry).length > 0 ? buttons : <View />}
-          </View>
-          <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
-            <MaterialIcons name='check' style={this.styles.bottomIcon} />
-          </TouchableOpacity>
+          <View style={[this.styles.formGroup, { paddingTop: screenHeight / 5 }]}>
+          <Text style={this.styles.text}>What are you grateful for today?</Text>
+          <TextInput
+            ref='forminput'
+            autoCorrect={true}
+            multiline={true}
+            onBlur={() => this.setState({ focused: false })}
+            onFocus={() => { this.setState({ focused: true }); this.refs.parentScrollView.scrollToEnd(true) }}
+            style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
+            autoCapitalize={'sentences'}
+            onChangeText={this.handleTextChange}
+            underlineColorAndroid={`rgba(0,0,0,0)`}
+            onContentSizeChange={this.handleTextFieldChange}
+            value={this.state.gratitude}
+          />
         </View>
-        <ConfirmModal
-          onConfirm={() => this.deleteEntry(entry)}
-          onCancel={() => this.setState({ isVisible: false })}
-          isVisible={this.state.isVisible}
-          buttons={['Cancel', 'Delete']}
-          prompt={'Delete this memory?'}
-          status={'warning'}
-        />
+        </ScrollView>
+      <View style={this.styles.buttonContainer}>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+          <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
+            <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
+          </TouchableOpacity>
+          {Object.keys(entry).length > 0 ? buttons : <View />}
+        </View>
+        <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
+          <MaterialIcons name='check' style={this.styles.bottomIcon} />
+        </TouchableOpacity>
+      </View>
+      <ConfirmModal
+        onConfirm={() => this.deleteEntry(entry)}
+        onCancel={() => this.setState({ isVisible: false })}
+        isVisible={this.state.isVisible}
+        buttons={['Cancel', 'Delete']}
+        prompt={'Delete this memory?'}
+        status={'warning'}
+      />
       </LinearGradient >
     )
   }

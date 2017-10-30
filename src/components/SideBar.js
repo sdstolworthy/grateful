@@ -33,7 +33,7 @@ class SideBar extends React.Component {
         const date = new Date(Date.now())
         date.setHours(hour)
         date.setMinutes(minute)
-        date.setDate(date.getDate() + 1)
+        date.setDate(date.getDate())
         setLocalNotification(date)
       }
     } catch ({ code, message }) {
@@ -105,7 +105,6 @@ styles = StyleSheet.create({
 })
 
 mapStateToProps = (state, ownProps) => {
-  console.log(JSON.stringify(state.Journals.pushEnabled, null, 2))
   return {
     pushEnabled: state.Journals.pushEnabled,
     pushTime: state.Journals.pushTime
