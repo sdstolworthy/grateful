@@ -83,7 +83,6 @@ class GratitudePrompt extends Component {
     }
   })
   componentDidMount () {
-    this.refs.forminput.focus()
     let entry = {}
     try {
       entry = Object.assign({}, this.props.navigation.state.params.entry)
