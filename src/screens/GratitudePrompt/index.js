@@ -19,7 +19,7 @@ import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { NavigationActions } from 'react-navigation'
 import { addEntry, editEntry, deleteEntry } from '../../services/journal-services'
-import { Octicons, Entypo, MaterialIcons } from '@expo/vector-icons'
+import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
 class GratitudePrompt extends Component {
@@ -37,9 +37,7 @@ class GratitudePrompt extends Component {
   styles = StyleSheet.create({
     container: {
       flex: 1,
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center'
+      // flexDirection: 'row',
     },
     text: {
       color: 'white',
@@ -49,7 +47,6 @@ class GratitudePrompt extends Component {
       textAlign: 'center',
     },
     formGroup: {
-      marginBottom: 200,
       flex: 1,
       justifyContent: 'center',
     },
@@ -64,7 +61,9 @@ class GratitudePrompt extends Component {
     },
     innerView: {
       flexDirection: 'column',
-      flexGrow: 1,
+      paddingTop: 30,
+      paddingHorizontal: 15,
+      justifyContent: 'space-between',
     },
     bottomIcon: {
       color: 'white',
@@ -80,6 +79,10 @@ class GratitudePrompt extends Component {
     },
     headerButton: {
       padding: 7
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
     }
   })
   componentDidMount () {
@@ -145,17 +148,17 @@ class GratitudePrompt extends Component {
   }
   render () {
     const { entry } = this.state
-    const { screen: screenHeight } = Dimensions.get('window')
+    const screenHeight = Dimensions.get('window').height
     const buttons = [
       (
         <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
           <Octicons name='calendar' style={this.styles.headerIcons} />
         </TouchableOpacity>
       ), (
-        <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.setState({isVisible: true})}>
+        <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.setState({ isVisible: true })}>
           <Octicons name='trashcan' style={this.styles.headerIcons} />
         </TouchableOpacity>
-      ) 
+      )
     ]
     return (
       <LinearGradient
@@ -169,7 +172,7 @@ class GratitudePrompt extends Component {
           contentContainerStyle={this.styles.innerView}
           onPress={this.toggleKeyboard}
         >
-          <View style={this.styles.formGroup}>
+          <View style={[this.styles.formGroup, {paddingTop: screenHeight / 5}]}>
             <Text style={this.styles.text}>What are you grateful for today?</Text>
             <TextInput
               ref='forminput'
@@ -185,20 +188,23 @@ class GratitudePrompt extends Component {
               value={this.state.gratitude}
             />
           </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              {Object.keys(entry).length > 0 ? buttons : <View />}
-            </View>
-            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
-              <MaterialIcons name='check' style={this.styles.bottomIcon} />
-            </TouchableOpacity>
-          </View>
         </ScrollView>
+        <View style={this.styles.buttonContainer}>
+          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
+              <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
+            </TouchableOpacity>
+            {Object.keys(entry).length > 0 ? buttons : <View />}
+          </View>
+          <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
+            <MaterialIcons name='check' style={this.styles.bottomIcon} />
+          </TouchableOpacity>
+        </View>
         <ConfirmModal
           onConfirm={() => this.deleteEntry(entry)}
-          onCancel={() => this.setState({isVisible: false})}
+          onCancel={() => this.setState({ isVisible: false })}
           isVisible={this.state.isVisible}
-          buttons={['Cancel','Delete']}
+          buttons={['Cancel', 'Delete']}
           prompt={'Delete this memory?'}
           status={'warning'}
         />

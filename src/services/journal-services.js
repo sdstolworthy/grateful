@@ -47,7 +47,9 @@ export function editEntry (entry) {
 export async function togglePushEnabled (isEnabled) {
   if (!isEnabled) {
     await Notifications.cancelAllScheduledNotificationsAsync()
-  } 
+  } else {
+    
+  }
   try {
     db.transaction(tx => {
       tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id))')
