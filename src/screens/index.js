@@ -18,32 +18,59 @@ class HomeSwiper extends Component {
   constructor (props) {
     super(props)
     this.state = {
+      index: 0,
       entry: {}
     }
+    this.swiperRef = swiper => {
+      this.swiper = swiper
+    }
   }
-  updateSwiper = (index) => {
-    this.refs.swiper.scrollBy(index, true)
-    // console.log(this.refs)
-    this.setState({index})
-    console.warn(index)
+  updateSwiper = (index, entry = {}) => {
+    let currentIndex = this.state.index
+    let resultSlide = undefined
+    let countSlides = 2
+    this.setState({
+      entry,
+      isUpdate: Object.keys(entry).length > 0
+    })
+    if (index > currentIndex && index !== countSlides) {
+      resultSlide = index - currentIndex;
+      this.swiper.scrollBy(resultSlide, true);
+    }
+    else if (index > currentIndex && index === countSlides) {
+      resultSlide = currentIndex + 1;
+      this.swiper.scrollBy(resultSlide, true);
+    }
+    else if (index < currentIndex && index !== 0) {
+      resultSlide = (currentIndex - index) * (-1);
+      this.swiper.scrollBy(resultSlide, true);
+    }
+    else if (index < currentIndex && index === 0) {
+      resultSlide = currentIndex * (-1);
+      this.swiper.scrollBy(resultSlide, true);
+    }
   }
   selectEntry = (entry) => {
-    this.setState({entry})
+    this.setState({ 
+      entry,
+    })
   }
   render () {
     return (
       <Swiper
-        ref="swiper"
+        ref={this.swiperRef}
         showsButtons={false}
         horizontal={true}
         loop={false}
         showsPagination={false}
-        index={this.state.index}
+        onIndexChanged={(index)=>this.setState({index})}
       >
         <View style={{ flex: 1 }}>
           <GratitudePrompt
+            isUpdate={this.state.isUpdate}
             changeIndex={this.updateSwiper}
             entry={this.state.entry}
+            onChangeEntry={this.selectEntry}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -69,7 +96,7 @@ const HomeScreenRouter = StackNavigator({
   // },
 }, {
     headerMode: 'none',
-    contentComponent: props => < SideBar { ...props } />
+    // contentComponent: props => < SideBar { ...props } />
     // contentComponent: () => <View/>
   });
 export default HomeScreenRouter;

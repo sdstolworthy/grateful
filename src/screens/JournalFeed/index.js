@@ -88,7 +88,6 @@ class JournalFeed extends Component {
   }
   createEntry = () => {
     clearTimeout(this.editButtonVisibleTimeout)
-    // this.props.navigation.navigate('Prompt', {})
     this.props.changeIndex(INDICES.prompt)
   }
   groupByDate = (value, index, array) => {
@@ -102,7 +101,7 @@ class JournalFeed extends Component {
   }
   editEntry = (value) => {
     clearTimeout(this.editButtonVisibleTimeout)
-    this.props.navigation.navigate('Prompt', { entry: value })
+    this.props.changeIndex(INDICES.prompt, value)
   }
   styles = StyleSheet.create({
     headerText: {

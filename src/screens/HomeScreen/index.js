@@ -12,7 +12,7 @@ class HomeScreen extends React.Component {
   }
   login = () => {
     signInWithGoogleAsync().then(() => {
-      this.props.navigation.navigate('Journal', {})
+      
     })
   }
   render () {
