@@ -21,11 +21,11 @@ export function getEntries () {
   })
 }
 
-export function addEntry (entry) {
+export function addEntry (entry, customDate = null) {
   if (!entry) {
     return
   }
-  const date = (new Date).getTime().toString()
+  const date = customDate || (new Date).getTime().toString()
   let arr = null
   try {
     db.transaction(tx => {

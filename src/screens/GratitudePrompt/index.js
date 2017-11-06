@@ -34,7 +34,7 @@ class GratitudePrompt extends Component {
       focused: false,
       entry: {},
       isVisible: false,
-      date: new Date,
+      date: (new Date).valueOf().toString(),
       slideAnim: new Animated.Value(-700),
       datePickerHeight: -700,
       datePickerVisible: false
@@ -120,7 +120,7 @@ class GratitudePrompt extends Component {
       entry.entry = this.state.gratitude
       editEntry(entry)
     } else {
-      addEntry(this.state.gratitude)
+      addEntry(this.state.gratitude, this.state.date)
     }
     this.props.navigation.navigate("Journal", {})
   }
@@ -155,7 +155,7 @@ class GratitudePrompt extends Component {
   }
   handleSelectDate = (date) => {
     let d = new Date
-    this.updateDate({ day: date.getDate(), month: date.getMonth(), year: date.getFullYear() })
+    this.updateDate({ day: date.getDate() + 1, month: date.getMonth(), year: date.getFullYear() })
     this.beginDateSlideOut()
   }
   updateDate = ({ year, month, day }) => {
@@ -163,16 +163,20 @@ class GratitudePrompt extends Component {
     const newDate = moment(`${year}-${month + 1}-${day}`, 'YYYY-M-D').valueOf().toString()
     if (!moment(newDate, 'x').isValid()) {
       console.error('invalid date!', newDate)
-      return
+      throw Error('this is an invalid date')
     }
     entry.date = newDate
-    this.setState(
-      {
-        entry: {
-          ...entry,
-          date: entry.date
-        }
-      }, () => editEntry(entry))
+    if ( Object.keys(this.state.entry).length > 0 ) {
+      this.setState(
+        {
+          entry: {
+            ...entry,
+            date: entry.date
+          }
+        }, () => editEntry(entry))
+    } else {
+      this.setState({date:newDate})
+    }
 
   }
   beginDateSlideIn = () => {
@@ -206,7 +210,7 @@ class GratitudePrompt extends Component {
     const screenHeight = Dimensions.get('window').height
     const screenWidth = Dimensions.get('window').width
 
-    const eventDate = moment(this.state.entry.date, 'x')
+    const eventDate = moment(this.state.entry.date || this.state.date, 'x')
     const buttons = [
       (
         <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
@@ -234,13 +238,9 @@ class GratitudePrompt extends Component {
         >
           <View style={[this.styles.formGroup, { paddingTop: screenHeight / 5 }]}>
             <Text style={this.styles.text}>What are you grateful for today?</Text>
-            {eventDate.isValid()
-              ? (
-                <TouchableOpacity onPress={this.selectDate}>
-                  <Text style={this.styles.dateText}>{eventDate.format('MMMM DD')}</Text>
-                </TouchableOpacity>
-              )
-              : <View />}
+            <TouchableOpacity onPress={this.selectDate}>
+              <Text style={this.styles.dateText}>{eventDate.isValid() ? eventDate.format('MMMM DD, YYYY') : moment(new Date).format('MMMM DD, YYYY')}</Text>
+            </TouchableOpacity>
             <TextInput
               ref='forminput'
               autoCorrect={true}
