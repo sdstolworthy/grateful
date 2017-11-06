@@ -26,6 +26,7 @@ import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
 import DatePickerIosModal from '../../components/DatePickerIos'
+import {INDICES} from '../index'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -105,36 +106,43 @@ class GratitudePrompt extends Component {
       entry = Object.assign({}, this.props.navigation.state.params.entry)
     } catch (e) { }
     this.setState({ entry, gratitude: entry.entry })
-    this.props.navigation.state.params = {}
+    // this.props.navigation.state.params = {}
     Keyboard.dismiss()
+  }
+  componentWillReceiveProps (nextProps) {
+    this.setState({
+      entry: nextProps.entry, 
+      gratitude: nextProps.entry.entry,
+    })
   }
   componentDidUpdate () {
     this.toggleKeyboard()
   }
   handleTextChange = (e) => {
-    this.setState({ gratitude: e })
+    this.props.onChangeEntry({
+      ...this.props.entry,
+      entry: e
+    })
   }
   submit = () => {
-    let entry = Object.assign({}, this.state.entry)
-
-    if (Object.keys(entry).length > 0) {
-      entry.entry = this.state.gratitude
+    let entry = Object.assign({}, this.props.entry)
+    if (this.props.isUpdate) {
       editEntry(entry)
     } else {
       addEntry(this.state.gratitude, this.state.date)
     }
-    this.props.navigation.navigate("Journal", {})
+    this.props.changeIndex(INDICES.feed)
   }
   handleTextFieldChange = ({ nativeEvent: { contentSize: { width, height } } }) => {
     this.setState({ inputHeight: height })
   }
   deleteEntry = (entry) => {
-    if (Object.keys(entry).length > 0) {
+    if (this.props.isUpdate) {
       deleteEntry(entry)
     } else {
       return
     }
-    this.props.navigation.navigate('Journal', {})
+    this.changeIndex(INDICES.prompt)
   }
   toggleKeyboard = () => {
   }
@@ -146,7 +154,7 @@ class GratitudePrompt extends Component {
       this.beginDateSlideIn()
     } else {
       const { action, year, month, day } = await DatePickerAndroid.open({
-        date: new Date(parseInt(this.state.entry.date)),
+        date: new Date(parseInt(this.props.entry.date)),
         maxDate: Date.now()
       })
       if (action !== DatePickerAndroid.dismissedAction) {
@@ -156,28 +164,18 @@ class GratitudePrompt extends Component {
   }
   handleSelectDate = (date) => {
     let d = new Date
-    this.updateDate({ day: date.getDate() + 1, month: date.getMonth(), year: date.getFullYear() })
+    this.updateDate({ day: date.getDate(), month: date.getMonth(), year: date.getFullYear() })
     this.beginDateSlideOut()
   }
   updateDate = ({ year, month, day }) => {
-    let entry = Object.assign({}, this.state.entry)
+    let entry = Object.assign({}, this.props.entry)
     const newDate = moment(`${year}-${month + 1}-${day}`, 'YYYY-M-D').valueOf().toString()
     if (!moment(newDate, 'x').isValid()) {
       console.error('invalid date!', newDate)
       throw Error('this is an invalid date')
     }
     entry.date = newDate
-    if ( Object.keys(this.state.entry).length > 0 ) {
-      this.setState(
-        {
-          entry: {
-            ...entry,
-            date: entry.date
-          }
-        }, () => editEntry(entry))
-    } else {
-      this.setState({date:newDate})
-    }
+    this.props.onChangeEntry(entry)
 
   }
   beginDateSlideIn = () => {
@@ -207,11 +205,11 @@ class GratitudePrompt extends Component {
     })
   }
   render () {
-    const { entry } = this.state
+    const { entry } = this.props
     const screenHeight = Dimensions.get('window').height
     const screenWidth = Dimensions.get('window').width
 
-    const eventDate = moment(this.state.entry.date || this.state.date, 'x')
+    const eventDate = moment(this.props.entry.date || this.state.date, 'x')
     const buttons = [
       (
         <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
@@ -231,11 +229,11 @@ class GratitudePrompt extends Component {
         style={this.styles.container}
       >
         <ScrollView
-          ref='parentScrollView'
           keyboardShouldPersistTaps={'never'}
+          ref={c => this.containerScroller = c}
           contentContainerStyle={this.styles.innerView}
           onPress={this.toggleKeyboard}
-          onContentSizeChange={(contentWidth, contentHeight) => { this.refs.parentScrollView.scrollToEnd(true) }}
+          onContentSizeChange={(contentWidth, contentHeight) => { this.containerScroller.scrollToEnd(true) }}
         >
           <View style={[this.styles.formGroup, { paddingTop: screenHeight / 5 }]}>
             <Text style={this.styles.text}>What are you grateful for today?</Text>
@@ -247,13 +245,13 @@ class GratitudePrompt extends Component {
               autoCorrect={true}
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
-              onFocus={() => { this.setState({ focused: true }); this.refs.parentScrollView.scrollToEnd(true) }}
+              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true)}}
               style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
               underlineColorAndroid={`rgba(0,0,0,0)`}
               onContentSizeChange={this.handleTextFieldChange}
-              value={this.state.gratitude}
+              value={this.props.entry.entry}
             />
           </View>
         </ScrollView>
@@ -261,10 +259,10 @@ class GratitudePrompt extends Component {
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
           <View style={this.styles.buttonContainer}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
+              {/* <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
                 <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
-              </TouchableOpacity>
-              {Object.keys(entry).length > 0 ? buttons : <View />}
+              </TouchableOpacity> */}
+              {this.props.isUpdate ? buttons : <View />}
             </View>
             <View style={{ flexDirection: 'row' }}>
               <TouchableOpacity onPress={this.submit}>
