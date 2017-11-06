@@ -8,9 +8,9 @@ import SideBar from "../components/SideBar.js";
 import GratitudePrompt from '../screens/GratitudePrompt'
 
 import {
-  DrawerNavigator
+  StackNavigator
 } from "react-navigation";
-const HomeScreenRouter = DrawerNavigator({
+const HomeScreenRouter = StackNavigator({
   Prompt: {
     screen: GratitudePrompt
   },
@@ -21,6 +21,9 @@ const HomeScreenRouter = DrawerNavigator({
   //   screen: HomeScreen,
   // },
 }, {
+  navigationOptions: {
+    gesturesEnabled: true,
+  },
   headerMode: 'none',
   contentComponent: props => < SideBar { ...props }/>
   // contentComponent: () => <View/>
