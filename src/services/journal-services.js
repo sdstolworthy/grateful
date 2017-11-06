@@ -2,8 +2,16 @@ import { db, store } from '../../App'
 import { dispatch } from 'react-redux'
 import { Alert } from 'react-native'
 import { setJournalEntries, setPushEnabled, setPushTime } from '../redux/actions/journal-actions'
-import { Permissions, Notifications } from 'expo'
+import Expo, { Permissions, Notifications } from 'expo'
 import moment from 'moment'
+async function getiOSNotificationPermission () {
+  const { status } = await Permissions.getAsync(
+    Permissions.NOTIFICATIONS
+  )
+  if (status !== 'granted') {
+    await Permissions.askAsync(Permissions.NOTIFICATIONS)
+  }
+}
 export function getEntries () {
   db.transaction(tx => {
     tx.executeSql('create table if not exists entries (id integer primary key not null, date text, entry text);')
@@ -12,6 +20,7 @@ export function getEntries () {
     })
   })
 }
+
 export function addEntry (entry) {
   if (!entry) {
     return
@@ -113,6 +122,7 @@ export function setLocalNotification (time) {
     time: time,
     repeat: 'day',
   }
+  getiOSNotificationPermission()
   Notifications.cancelAllScheduledNotificationsAsync().then(() => {
     Notifications.scheduleLocalNotificationAsync(
       localNotification,

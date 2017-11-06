@@ -10,7 +10,9 @@ import {
   ScrollView,
   TouchableOpacity,
   DatePickerAndroid,
-  DatePickerIOS
+  DatePickerIOS,
+  Platform,
+  Animated
 } from 'react-native'
 import { Icon } from 'native-base'
 import { LinearGradient } from 'expo'
@@ -22,6 +24,7 @@ import { addEntry, editEntry, deleteEntry } from '../../services/journal-service
 import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
+import DatePickerIosModal from '../../components/DatePickerIos'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -30,7 +33,11 @@ class GratitudePrompt extends Component {
       gratitude: '',
       focused: false,
       entry: {},
-      isVisible: false
+      isVisible: false,
+      date: new Date,
+      slideAnim: new Animated.Value(-700),
+      datePickerHeight: -700,
+      datePickerVisible: false
     }
     this.selectDate = this.selectDate.bind(this)
   }
@@ -83,6 +90,12 @@ class GratitudePrompt extends Component {
     buttonContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
+    },
+    dateText: {
+      color: 'white',
+      fontFamily: 'Raleway',
+      fontSize: 22,
+      textAlign: 'center',
     }
   })
   componentDidMount () {
@@ -124,39 +137,84 @@ class GratitudePrompt extends Component {
   }
   toggleKeyboard = () => {
   }
+  handleIOSDateChange = (e) => {
+    this.setState({ date: e })
+  }
   async selectDate () {
-    const { action, year, month, day } = await DatePickerAndroid.open({
-      date: new Date(parseInt(this.state.entry.date)),
-      maxDate: Date.now()
-    })
-    if (action !== DatePickerAndroid.dismissedAction) {
-      let entry = Object.assign({}, this.state.entry)
-      const newDate = moment(`${year}-${month + 1}-${day}`, 'YYYY-M-D').valueOf().toString()
-      if (!moment(newDate, 'x').isValid()) {
-        console.error('invalid date!', newDate)
-        return
+    if (Platform.OS === 'ios') {
+      this.beginDateSlideIn()
+    } else {
+      const { action, year, month, day } = await DatePickerAndroid.open({
+        date: new Date(parseInt(this.state.entry.date)),
+        maxDate: Date.now()
+      })
+      if (action !== DatePickerAndroid.dismissedAction) {
+        this.updateDate({ year, month, day })
       }
-      entry.date = newDate
-      this.setState(
-        {
-          entry: {
-            ...entry,
-            date: entry.date
-          }
-        }, () => editEntry(entry))
     }
+  }
+  handleSelectDate = (date) => {
+    let d = new Date
+    this.updateDate({ day: date.getDate(), month: date.getMonth(), year: date.getFullYear() })
+    this.beginDateSlideOut()
+  }
+  updateDate = ({ year, month, day }) => {
+    let entry = Object.assign({}, this.state.entry)
+    const newDate = moment(`${year}-${month + 1}-${day}`, 'YYYY-M-D').valueOf().toString()
+    if (!moment(newDate, 'x').isValid()) {
+      console.error('invalid date!', newDate)
+      return
+    }
+    entry.date = newDate
+    this.setState(
+      {
+        entry: {
+          ...entry,
+          date: entry.date
+        }
+      }, () => editEntry(entry))
+
+  }
+  beginDateSlideIn = () => {
+    this.setState({ datePickerVisible: true })
+    Animated.timing(
+      this.state.slideAnim,
+      {
+        toValue: 0,
+        duration: 250,
+      }
+    ).start()
+  }
+  beginDateSlideOut = () => {
+    this.setState({ datePickerVisible: false })
+    Animated.timing(
+      this.state.slideAnim,
+      {
+        toValue: -this.state.datePickerHeight,
+        duration: 250,
+      }
+    ).start()
+  }
+  handleDatePickerLayout = (event) => {
+    this.setState({
+      datePickerHeight: event.nativeEvent.layout.height,
+      slideAnim: new Animated.Value(-1 * event.nativeEvent.layout.height)
+    })
   }
   render () {
     const { entry } = this.state
     const screenHeight = Dimensions.get('window').height
+    const screenWidth = Dimensions.get('window').width
+
+    const eventDate = moment(this.state.entry.date, 'x')
     const buttons = [
       (
         <TouchableOpacity key={'cal'} style={this.styles.headerButton} onPress={this.selectDate}>
-          <Octicons name='calendar' style={this.styles.headerIcons} />
+          <Ionicons name='ios-calendar-outline' style={this.styles.headerIcons} />
         </TouchableOpacity>
       ), (
         <TouchableOpacity key={'trash'} style={this.styles.headerButton} onPress={() => this.setState({ isVisible: true })}>
-          <Octicons name='trashcan' style={this.styles.headerIcons} />
+          <Ionicons name='ios-trash-outline' style={this.styles.headerIcons} />
         </TouchableOpacity>
       )
     ]
@@ -169,47 +227,81 @@ class GratitudePrompt extends Component {
       >
         <ScrollView
           ref='parentScrollView'
-          keyboardShouldPersistTaps={'handled'}
+          keyboardShouldPersistTaps={'never'}
           contentContainerStyle={this.styles.innerView}
           onPress={this.toggleKeyboard}
-          onContentSizeChange={(contentWidth, contentHeight) => { this.refs.parentScrollView.scrollToEnd(true)}}
+          onContentSizeChange={(contentWidth, contentHeight) => { this.refs.parentScrollView.scrollToEnd(true) }}
         >
           <View style={[this.styles.formGroup, { paddingTop: screenHeight / 5 }]}>
-          <Text style={this.styles.text}>What are you grateful for today?</Text>
-          <TextInput
-            ref='forminput'
-            autoCorrect={true}
-            multiline={true}
-            onBlur={() => this.setState({ focused: false })}
-            onFocus={() => { this.setState({ focused: true }); this.refs.parentScrollView.scrollToEnd(true) }}
-            style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
-            autoCapitalize={'sentences'}
-            onChangeText={this.handleTextChange}
-            underlineColorAndroid={`rgba(0,0,0,0)`}
-            onContentSizeChange={this.handleTextFieldChange}
-            value={this.state.gratitude}
-          />
-        </View>
+            <Text style={this.styles.text}>What are you grateful for today?</Text>
+            {eventDate.isValid()
+              ? (
+                <TouchableOpacity onPress={this.selectDate}>
+                  <Text style={this.styles.dateText}>{eventDate.format('MMMM DD')}</Text>
+                </TouchableOpacity>
+              )
+              : <View />}
+            <TextInput
+              ref='forminput'
+              autoCorrect={true}
+              multiline={true}
+              onBlur={() => this.setState({ focused: false })}
+              onFocus={() => { this.setState({ focused: true }); this.refs.parentScrollView.scrollToEnd(true) }}
+              style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
+              autoCapitalize={'sentences'}
+              onChangeText={this.handleTextChange}
+              underlineColorAndroid={`rgba(0,0,0,0)`}
+              onContentSizeChange={this.handleTextFieldChange}
+              value={this.state.gratitude}
+            />
+          </View>
         </ScrollView>
-      <View style={this.styles.buttonContainer}>
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-          <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
-            <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
-          </TouchableOpacity>
-          {Object.keys(entry).length > 0 ? buttons : <View />}
-        </View>
-        <TouchableOpacity style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }} onPress={this.submit}>
-          <MaterialIcons name='check' style={this.styles.bottomIcon} />
-        </TouchableOpacity>
-      </View>
-      <ConfirmModal
-        onConfirm={() => this.deleteEntry(entry)}
-        onCancel={() => this.setState({ isVisible: false })}
-        isVisible={this.state.isVisible}
-        buttons={['Cancel', 'Delete']}
-        prompt={'Delete this memory?'}
-        status={'warning'}
-      />
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
+          <View style={this.styles.buttonContainer}>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+              <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
+                <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
+              </TouchableOpacity>
+              {Object.keys(entry).length > 0 ? buttons : <View />}
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity onPress={this.submit}>
+                <MaterialIcons name='check' style={this.styles.bottomIcon} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+        <ConfirmModal
+          onConfirm={() => this.deleteEntry(entry)}
+          onCancel={() => this.setState({ isVisible: false })}
+          isVisible={this.state.isVisible}
+          buttons={['Cancel', 'Delete']}
+          prompt={'Delete this memory?'}
+          status={'warning'}
+        />
+        {this.state.datePickerVisible
+          ? <View
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: this.state.datePickerHeight,
+              right: 0,
+              left: 0,
+            }}
+            onTouchEnd={this.beginDateSlideOut}
+          />
+          : <View />
+        }
+        <Animated.View
+          style={{
+            left: 0,
+            right: 0,
+            bottom: this.state.slideAnim,
+            position: 'absolute',
+          }}
+        >
+          <DatePickerIosModal handleDateSelect={this.handleSelectDate} onLayout={this.handleDatePickerLayout} />
+        </Animated.View>
       </LinearGradient >
     )
   }

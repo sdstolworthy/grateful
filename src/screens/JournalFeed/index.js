@@ -10,7 +10,7 @@ import {
   TextInput,
   Animated
 } from 'react-native'
-import { Octicons } from '@expo/vector-icons'
+import { Octicons, Ionicons } from '@expo/vector-icons'
 import StatusBumper from '../../components/StatusBumper'
 import moment from 'moment'
 import { db } from '../../../App'
@@ -29,7 +29,8 @@ class JournalFeed extends Component {
       sortedDates: {},
       searchText: '',
       editVisible: true,
-      slideAnim: new Animated.Value(15)
+      slideAnim: new Animated.Value(15),
+      scrollPositionPercent: 0
     }
     this.groupedByDate = {}
     this.editButtonVisibleTimeout
@@ -74,6 +75,7 @@ class JournalFeed extends Component {
     )
   }
   searchEntries = (e) => {
+    this.setState({ searchText: e })
     const newEntries = this.props.entries.filter(value => {
       return value.entry.toLowerCase().indexOf(e.toLowerCase()) > -1
     })
@@ -130,20 +132,20 @@ class JournalFeed extends Component {
       borderRadius: 35,
       justifyContent: 'center',
       alignItems: 'center',
-      elevation: 5
+      elevation: 5,
+      margin: 7,
     },
     editTouchable: {
       position: 'absolute',
       bottom: 15,
       right: 15,
-      height: 80,
-      width: 80,
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
     },
     editIcon: {
       color: 'white',
       fontSize: 30,
+      backgroundColor: 'rgba(0,0,0,0)'
     },
     dateContainer: {
       marginBottom: 15,
@@ -159,16 +161,20 @@ class JournalFeed extends Component {
       fontSize: 22,
       marginTop: 0,
       marginBottom: -8,
+      backgroundColor: 'rgba(0,0,0,0)'
     },
     dayText: {
       color: 'white',
       fontFamily: 'RalewaySemiBold',
       fontSize: 35,
+      backgroundColor: 'rgba(0,0,0,0)'
     },
     entryText: {
       color: 'white',
       fontFamily: 'Lato',
       fontSize: 22,
+      marginBottom: 7,
+      backgroundColor: 'rgba(0,0,0,0)'
     },
     searchBar: {
       borderColor: 'rgba(0,0,0,0)',
@@ -177,7 +183,7 @@ class JournalFeed extends Component {
       borderRadius: 18,
       paddingHorizontal: 15,
       marginTop: 15,
-      marginBottom: 25,
+      marginBottom: 10,
       flexDirection: 'row',
       alignItems: 'center',
     },
@@ -186,6 +192,10 @@ class JournalFeed extends Component {
       fontFamily: 'RalewayLight',
       fontSize: 22,
       flex: 1,
+    },
+    searchIcon: {
+      color: 'white',
+      marginRight: 15
     }
   })
 
@@ -195,6 +205,7 @@ class JournalFeed extends Component {
     this.editButtonVisibleTimeout = setTimeout(this.beginSlideOutAnimation, 2000)
   }
   render () {
+    const screenHeight = Dimensions.get('window').height
     let { sortedDates } = this.state
     const entryCards = Object.keys(sortedDates).map((value, index) => {
       const entriesPerDay = sortedDates[value].map((val, idx) => {
@@ -220,25 +231,35 @@ class JournalFeed extends Component {
       <Background
         colors={['#6882E1', '#1B48ED']}
       >
+        <View style={this.styles.searchBar}>
+          <Ionicons name='ios-search-outline' style={this.styles.searchIcon} size={22} />
+          <TextInput
+            underlineColorAndroid='rgba(0,0,0,0)'
+            placeholder='Search'
+            placeholderTextColor='white'
+            style={this.styles.searchInput}
+            onChangeText={this.searchEntries}
+            value={this.state.searchText}
+          />
+          {this.state.searchText
+            ? <TouchableOpacity onPress={() => { this.searchEntries('') }}>
+              <Ionicons name='ios-close-circle-outline' style={this.styles.searchIcon} size={22} />
+            </TouchableOpacity>
+            : <View />}
+        </View>
         <ScrollView
           style={this.styles.scroll}
           contentContainerStyle={this.styles.innerView}
           onTouchStart={this.setEditButtonVisible}
+          showsVerticalScrollIndicator={false}
+          onScroll={this.handleScroll}
+          onLayout={this.handleLayout}
+          onContentSizeChange={this.handleContentSizeChange}
         >
-          <View style={this.styles.searchBar}>
-            <TextInput
-              underlineColorAndroid='rgba(0,0,0,0)'
-              onChangeText={this.handleSearch}
-              placeholder='Search'
-              placeholderTextColor='white'
-              style={this.styles.searchInput}
-              onChangeText={this.searchEntries}
-            />
-          </View>
           {entryCards}
         </ScrollView>
         <Animated.View style={[this.styles.editTouchable, { bottom: this.state.slideAnim }]} onPress={this.createEntry}>
-          <TouchableOpacity onPress={this.createEntry}>
+          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={this.createEntry}>
             <LinearGradient
               colors={['#E16868', '#EF508D']}
               style={this.styles.editButton}
