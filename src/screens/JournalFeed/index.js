@@ -18,7 +18,7 @@ import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { Background } from '../../components/Background'
 import { LinearGradient } from 'expo'
-
+import {INDICES} from '../index'
 class JournalFeed extends Component {
 
   constructor (props) {
@@ -88,7 +88,8 @@ class JournalFeed extends Component {
   }
   createEntry = () => {
     clearTimeout(this.editButtonVisibleTimeout)
-    this.props.navigation.navigate('Prompt', {})
+    // this.props.navigation.navigate('Prompt', {})
+    this.props.changeIndex(INDICES.prompt)
   }
   groupByDate = (value, index, array) => {
     let date = moment(parseInt(value.date))

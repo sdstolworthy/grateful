@@ -105,7 +105,7 @@ class GratitudePrompt extends Component {
       entry = Object.assign({}, this.props.navigation.state.params.entry)
     } catch (e) { }
     this.setState({ entry, gratitude: entry.entry })
-    this.props.navigation.state.params = {}
+    // this.props.navigation.state.params = {}
     Keyboard.dismiss()
   }
   componentDidUpdate () {
@@ -231,11 +231,10 @@ class GratitudePrompt extends Component {
         style={this.styles.container}
       >
         <ScrollView
-          ref='parentScrollView'
           keyboardShouldPersistTaps={'never'}
           contentContainerStyle={this.styles.innerView}
           onPress={this.toggleKeyboard}
-          onContentSizeChange={(contentWidth, contentHeight) => { this.refs.parentScrollView.scrollToEnd(true) }}
+          onContentSizeChange={(contentWidth, contentHeight) => { /*this.refs.containerScroller.scrollToEnd(true)*/ }}
         >
           <View style={[this.styles.formGroup, { paddingTop: screenHeight / 5 }]}>
             <Text style={this.styles.text}>What are you grateful for today?</Text>
@@ -247,7 +246,7 @@ class GratitudePrompt extends Component {
               autoCorrect={true}
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
-              onFocus={() => { this.setState({ focused: true }); this.refs.parentScrollView.scrollToEnd(true) }}
+              onFocus={() => { this.setState({ focused: true })}}
               style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
