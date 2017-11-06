@@ -14,6 +14,7 @@ import {
   Platform,
   Animated
 } from 'react-native'
+import KeyboardSpacer from 'react-native-keyboard-spacer'
 import { Icon } from 'native-base'
 import { LinearGradient } from 'expo'
 import { db } from '../../../App'
@@ -256,6 +257,7 @@ class GratitudePrompt extends Component {
             />
           </View>
         </ScrollView>
+        <KeyboardSpacer />
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
           <View style={this.styles.buttonContainer}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
