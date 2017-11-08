@@ -26,7 +26,7 @@ import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
 import DatePickerIosModal from '../../components/DatePickerIos'
-import {INDICES} from '../index'
+import { INDICES } from '../index'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -111,7 +111,7 @@ class GratitudePrompt extends Component {
   }
   componentWillReceiveProps (nextProps) {
     this.setState({
-      entry: nextProps.entry, 
+      entry: nextProps.entry,
       gratitude: nextProps.entry.entry,
     })
   }
@@ -245,7 +245,7 @@ class GratitudePrompt extends Component {
               autoCorrect={true}
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
-              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true)}}
+              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true) }}
               style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
@@ -255,7 +255,7 @@ class GratitudePrompt extends Component {
             />
           </View>
         </ScrollView>
-        <KeyboardSpacer />
+        {Platform.OS === 'ios' ? <KeyboardSpacer /> : null }
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
           <View style={this.styles.buttonContainer}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
