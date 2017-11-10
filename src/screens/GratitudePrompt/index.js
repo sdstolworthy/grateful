@@ -142,7 +142,7 @@ class GratitudePrompt extends Component {
     } else {
       return
     }
-    this.changeIndex(INDICES.prompt)
+    // this.changeIndex(INDICES.prompt)
   }
   toggleKeyboard = () => {
   }
