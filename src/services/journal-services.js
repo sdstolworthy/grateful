@@ -12,6 +12,17 @@ async function getiOSNotificationPermission () {
     await Permissions.askAsync(Permissions.NOTIFICATIONS)
   }
 }
+
+export function synchronizeDatabase () {
+  db.transaction(tx => {
+    tx.executeSql('create table if not exists entries (id integer primary key not null, date text, entry text);')
+    tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
+      _array.map(v => console.log(v))
+      return _array
+    })
+  })
+}
+
 export function getEntries () {
   db.transaction(tx => {
     tx.executeSql('create table if not exists entries (id integer primary key not null, date text, entry text);')

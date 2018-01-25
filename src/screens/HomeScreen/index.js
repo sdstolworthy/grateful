@@ -1,8 +1,10 @@
 import React from "react";
 import { StatusBar, View } from "react-native";
 import { Container, Header, Input, Title, Left, Icon, Right, Button, Body, Content, Text, Card, CardItem, Item } from "native-base";
-import { Constants } from 'expo'
-import { signInWithGoogleAsync } from '../../services/auth-service'
+import { Constants, LinearGradient } from 'expo'
+import { NavigationActions } from 'react-navigation'
+import { signInWithGoogleAsync, loginFromStorage } from '../../services/auth-service'
+import { synchronizeDatabase } from '../../services/journal-services'
 import StatusBumper from '../../components/StatusBumper'
 import { connect } from 'react-redux'
 class HomeScreen extends React.Component {
@@ -12,25 +14,39 @@ class HomeScreen extends React.Component {
   }
   login = () => {
     signInWithGoogleAsync().then(() => {
-      
     })
+  }
+  componentWillMount () {
+    synchronizeDatabase()
+    const authPromise = loginFromStorage().then(user => {
+      const navigationAction = NavigationActions.reset({
+        index: 0,
+        actions: [
+          NavigationActions.navigate({ routeName: 'Prompt' })
+        ]
+      })
+      this.props.navigation.dispatch(navigationAction)
+    }).catch(e => console.warn('error', e))
   }
   render () {
     return (
-      <Container >
-        <Header paddingTop={Constants.statusBarHeight} androidStatusBarColor="black">
-          <Left />
-          <Body>
-            <Title>Hello</Title>
-          </Body>
-          <Right />
-        </Header>
+      <LinearGradient
+        colors={['#4E7AC7', '#35478C']}
+        start={[.1, .1]}
+        end={[.3, 1]}
+        style={{ flex: 1 }}
+      >
         <Button onPress={this.login}>
           <Text>Click me</Text>
         </Button>
-      </Container>
-    );
+      </LinearGradient>
+    )
   }
 }
 
-export default connect(() => ({}), {})(HomeScreen)
+const mstp = (state, ownProps) => ({})
+
+const mdtp = (dispatch) => ({
+})
+
+export default connect(mstp, mdtp)(HomeScreen)

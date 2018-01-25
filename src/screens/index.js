@@ -85,18 +85,13 @@ class HomeSwiper extends Component {
   }
 }
 const HomeScreenRouter = StackNavigator({
+  Login: {
+    screen: HomeScreen
+  },
   Prompt: {
     screen: HomeSwiper
   },
-  // Journal: {
-  //   screen: JournalFeed
-  // },
-  // Home: {
-  //   screen: HomeScreen,
-  // },
 }, {
     headerMode: 'none',
-    // contentComponent: props => < SideBar { ...props } />
-    // contentComponent: () => <View/>
   });
 export default HomeScreenRouter;

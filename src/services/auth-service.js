@@ -1,15 +1,15 @@
-import Expo from 'expo'
+import Expo, { Google } from 'expo'
 import firebase from 'firebase'
-import * as secrets from '../../secrets.json'
+import secrets from '../../secrets.js'
 import { AsyncStorage } from 'react-native'
-
+import { navigate } from '../redux/actions/nav-actions'
 const USER_REF = '/TEST-users/'
 const PROVIDER_USER_REF = '/TEST-provider-user/'
 export async function signInWithGoogleAsync () {
   try {
-    const result = await Expo.Google.logInAsync({
-      androidClientId: secrets.androidClientId,
-      iosClientId: secrets.iosClientId,
+    const result = await Google.logInAsync({
+      androidClientId: secrets.androidClient,
+      iosClientId: secrets.iosClient,
       scopes: ['profile', 'email'],
     })
     const credential = {
@@ -22,7 +22,13 @@ export async function signInWithGoogleAsync () {
     AsyncStorage.setItem('access-token', result.accessToken)
     AsyncStorage.setItem('id-token', result.idToken)
     firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(result.idToken, result.accessToken)).then(response => {
-      firebase.auth().currentUser.getIdToken().then(user => {
+      firebase.database().ref(USER_REF + response.uid).set({
+        displayName: response.displayName,
+        email: response.email,
+        phoneNumber: response.phoneNumber,
+        emailVerified: response.emailVerified,
+        photoUrl: response.photoURL,
+        id: response.uid
       })
     })
   } catch (e) {
@@ -38,7 +44,7 @@ async function getIdToken () {
 async function getToken () {
   let token = ''
   await AsyncStorage.getItem('access-token').then(user_token => token = user_token)
-  await AsyncStorage.getAllKeys().then(keys => console.log(keys))
+  // await AsyncStorage.getAllKeys().then(keys => console.log(keys))
   return token
 }
 
@@ -51,7 +57,7 @@ export async function loginFromStorage () {
   const id = await getIdToken()
   const credential = firebase.auth.GoogleAuthProvider.credential(id, token)
   return firebase.auth().signInWithCredential(credential).then(res => {
-    return firebase.database().ref(`${USER_REF}${res.uid}`).once("value").then(snapshot => {
+    return firebase.database().ref(`${USER_REF}${res.uid}`).once('value').then(snapshot => {
       if (!snapshot.val()) {
         return false
       } else {
@@ -59,6 +65,7 @@ export async function loginFromStorage () {
       }
     })
   }).catch(error => {
+    console.log('error', error)
     signInWithGoogleAsync()
   })
 }

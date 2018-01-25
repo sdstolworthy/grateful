@@ -18,10 +18,10 @@ import { connect, dispatch } from 'react-redux'
 import { setJournalEntries } from '../../redux/actions/journal-actions'
 import { Background } from '../../components/Background'
 import { LinearGradient } from 'expo'
-import {INDICES} from '../index'
+import { INDICES } from '../index'
 class JournalFeed extends Component {
 
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       entries: [],
@@ -102,6 +102,78 @@ class JournalFeed extends Component {
   editEntry = (value) => {
     clearTimeout(this.editButtonVisibleTimeout)
     this.props.changeIndex(INDICES.prompt, value)
+  }
+  setEditButtonVisible = () => {
+    clearTimeout(this.editButtonVisibleTimeout)
+    this.beginSlideInAnimation()
+    this.editButtonVisibleTimeout = setTimeout(this.beginSlideOutAnimation, 2000)
+  }
+  render () {
+    const screenHeight = Dimensions.get('window').height
+    let { sortedDates } = this.state
+    const entryCards = Object.keys(sortedDates).map((value, index) => {
+      const entriesPerDay = sortedDates[value].map((val, idx) => {
+        return (
+          <TouchableOpacity key={idx} onPress={() => this.editEntry(val)}>
+            <Text style={this.styles.entryText}>{val.entry}</Text>
+          </TouchableOpacity>
+        )
+      })
+      return (
+        <View key={index} style={this.styles.dateContainer}>
+          <View style={this.styles.dateHeaderContainer}>
+            <Text style={this.styles.monthText}>{moment(value).format('MMM')}</Text>
+            <Text style={this.styles.dayText}>{moment(value).format('DD')}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            {entriesPerDay}
+          </View>
+        </View>
+      )
+    })
+    return (
+      <Background
+        colors={['#4E7AC7', '#35478C']}
+      >
+        <View style={this.styles.searchBar}>
+          <Ionicons name='ios-search-outline' style={this.styles.searchIcon} size={22} />
+          <TextInput
+            underlineColorAndroid='rgba(0,0,0,0)'
+            placeholder='Search'
+            placeholderTextColor='white'
+            style={this.styles.searchInput}
+            onChangeText={this.searchEntries}
+            value={this.state.searchText}
+          />
+          {this.state.searchText
+            ? <TouchableOpacity onPress={() => { this.searchEntries('') }}>
+              <Ionicons name='ios-close-circle-outline' style={this.styles.searchIcon} size={22} />
+            </TouchableOpacity>
+            : <View />}
+        </View>
+        <ScrollView
+          style={this.styles.scroll}
+          contentContainerStyle={this.styles.innerView}
+          onTouchStart={this.setEditButtonVisible}
+          showsVerticalScrollIndicator={false}
+          onScroll={this.handleScroll}
+          onLayout={this.handleLayout}
+          onContentSizeChange={this.handleContentSizeChange}
+        >
+          {entryCards}
+        </ScrollView>
+        <Animated.View style={[this.styles.editTouchable, { bottom: this.state.slideAnim }]} onPress={this.createEntry}>
+          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={this.createEntry}>
+            <LinearGradient
+              colors={['#E16868', '#EF508D']}
+              style={this.styles.editButton}
+            >
+              <Octicons name='pencil' style={this.styles.editIcon} />
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
+      </Background>
+    )
   }
   styles = StyleSheet.create({
     headerText: {
@@ -198,79 +270,6 @@ class JournalFeed extends Component {
       marginRight: 15
     }
   })
-
-  setEditButtonVisible = () => {
-    clearTimeout(this.editButtonVisibleTimeout)
-    this.beginSlideInAnimation()
-    this.editButtonVisibleTimeout = setTimeout(this.beginSlideOutAnimation, 2000)
-  }
-  render () {
-    const screenHeight = Dimensions.get('window').height
-    let { sortedDates } = this.state
-    const entryCards = Object.keys(sortedDates).map((value, index) => {
-      const entriesPerDay = sortedDates[value].map((val, idx) => {
-        return (
-          <TouchableOpacity key={idx} onPress={() => this.editEntry(val)}>
-            <Text style={this.styles.entryText}>{val.entry}</Text>
-          </TouchableOpacity>
-        )
-      })
-      return (
-        <View key={index} style={this.styles.dateContainer}>
-          <View style={this.styles.dateHeaderContainer}>
-            <Text style={this.styles.monthText}>{moment(value).format('MMM')}</Text>
-            <Text style={this.styles.dayText}>{moment(value).format('DD')}</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            {entriesPerDay}
-          </View>
-        </View>
-      )
-    })
-    return (
-      <Background
-        colors={['#6882E1', '#1B48ED']}
-      >
-        <View style={this.styles.searchBar}>
-          <Ionicons name='ios-search-outline' style={this.styles.searchIcon} size={22} />
-          <TextInput
-            underlineColorAndroid='rgba(0,0,0,0)'
-            placeholder='Search'
-            placeholderTextColor='white'
-            style={this.styles.searchInput}
-            onChangeText={this.searchEntries}
-            value={this.state.searchText}
-          />
-          {this.state.searchText
-            ? <TouchableOpacity onPress={() => { this.searchEntries('') }}>
-              <Ionicons name='ios-close-circle-outline' style={this.styles.searchIcon} size={22} />
-            </TouchableOpacity>
-            : <View />}
-        </View>
-        <ScrollView
-          style={this.styles.scroll}
-          contentContainerStyle={this.styles.innerView}
-          onTouchStart={this.setEditButtonVisible}
-          showsVerticalScrollIndicator={false}
-          onScroll={this.handleScroll}
-          onLayout={this.handleLayout}
-          onContentSizeChange={this.handleContentSizeChange}
-        >
-          {entryCards}
-        </ScrollView>
-        <Animated.View style={[this.styles.editTouchable, { bottom: this.state.slideAnim }]} onPress={this.createEntry}>
-          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={this.createEntry}>
-            <LinearGradient
-              colors={['#E16868', '#EF508D']}
-              style={this.styles.editButton}
-            >
-              <Octicons name='pencil' style={this.styles.editIcon} />
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
-      </Background>
-    )
-  }
 }
 
 function mapStateToProps (state, ownProps) {

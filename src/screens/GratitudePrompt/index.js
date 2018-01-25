@@ -26,9 +26,9 @@ import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
 import DatePickerIosModal from '../../components/DatePickerIos'
-import {INDICES} from '../index'
+import { INDICES } from '../index'
 class GratitudePrompt extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
     this.state = {
       inputHeight: 35,
@@ -43,63 +43,7 @@ class GratitudePrompt extends Component {
     }
     this.selectDate = this.selectDate.bind(this)
   }
-  styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      // flexDirection: 'row',
-    },
-    text: {
-      color: 'white',
-      fontSize: 27,
-      marginBottom: 20,
-      fontFamily: 'RalewaySemiBold',
-      textAlign: 'center',
-    },
-    formGroup: {
-      flex: 1,
-      justifyContent: 'center',
-    },
-    input: {
-      color: 'white',
-      fontSize: 22,
-      backgroundColor: 'rgba(255,255,255,0.2)',
-      borderRadius: 5,
-      padding: 10,
-      margin: 15,
-      fontFamily: 'Lato'
-    },
-    innerView: {
-      flexDirection: 'column',
-      paddingTop: 30,
-      paddingHorizontal: 15,
-      justifyContent: 'space-between',
-    },
-    bottomIcon: {
-      color: 'white',
-      fontSize: 50,
-      alignSelf: 'flex-end',
-      padding: 30,
-    },
-    headerIcons: {
-      color: 'white',
-      alignSelf: 'flex-start',
-      fontSize: 35,
-      marginLeft: 15,
-    },
-    headerButton: {
-      padding: 7
-    },
-    buttonContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-    },
-    dateText: {
-      color: 'white',
-      fontFamily: 'Raleway',
-      fontSize: 22,
-      textAlign: 'center',
-    }
-  })
+
   componentDidMount () {
     let entry = {}
     try {
@@ -111,7 +55,7 @@ class GratitudePrompt extends Component {
   }
   componentWillReceiveProps (nextProps) {
     this.setState({
-      entry: nextProps.entry, 
+      entry: nextProps.entry,
       gratitude: nextProps.entry.entry,
     })
   }
@@ -223,7 +167,7 @@ class GratitudePrompt extends Component {
     ]
     return (
       <LinearGradient
-        colors={['#6882E1', '#1B48ED']}
+        colors={['#4E7AC7', '#35478C']}
         start={[.1, .1]}
         end={[.3, 1]}
         style={this.styles.container}
@@ -245,13 +189,14 @@ class GratitudePrompt extends Component {
               autoCorrect={true}
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
-              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true)}}
+              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true) }}
               style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
               underlineColorAndroid={`rgba(0,0,0,0)`}
               onContentSizeChange={this.handleTextFieldChange}
               value={this.props.entry.entry}
+              tintColor="white"
             />
           </View>
         </ScrollView>
@@ -305,6 +250,63 @@ class GratitudePrompt extends Component {
       </LinearGradient >
     )
   }
+  styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      // flexDirection: 'row',
+    },
+    text: {
+      color: 'white',
+      fontSize: 27,
+      marginBottom: 20,
+      fontFamily: 'RalewaySemiBold',
+      textAlign: 'center',
+    },
+    formGroup: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    input: {
+      color: 'white',
+      fontSize: 22,
+      backgroundColor: 'rgba(255,255,255,0.2)',
+      borderRadius: 5,
+      padding: 10,
+      margin: 15,
+      fontFamily: 'Lato'
+    },
+    innerView: {
+      flexDirection: 'column',
+      paddingTop: 30,
+      paddingHorizontal: 15,
+      justifyContent: 'space-between',
+    },
+    bottomIcon: {
+      color: 'white',
+      fontSize: 50,
+      alignSelf: 'flex-end',
+      padding: 30,
+    },
+    headerIcons: {
+      color: 'white',
+      alignSelf: 'flex-start',
+      fontSize: 35,
+      marginLeft: 15,
+    },
+    headerButton: {
+      padding: 7
+    },
+    buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+    },
+    dateText: {
+      color: 'white',
+      fontFamily: 'Raleway',
+      fontSize: 22,
+      textAlign: 'center',
+    }
+  })
 }
 
 function mapStateToProps (state) {
