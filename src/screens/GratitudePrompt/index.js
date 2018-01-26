@@ -26,7 +26,7 @@ import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
 import DatePickerIosModal from '../../components/DatePickerIos'
-import {INDICES} from '../index'
+import { INDICES } from '../index'
 class GratitudePrompt extends Component {
   constructor (props) {
     super(props)
@@ -105,13 +105,17 @@ class GratitudePrompt extends Component {
     try {
       entry = Object.assign({}, this.props.navigation.state.params.entry)
     } catch (e) { }
-    this.setState({ entry, gratitude: entry.entry })
+    this.setState({
+      entry,
+      gratitude: entry.entry,
+      date: entry.date || new Date().valueOf()
+    })
     // this.props.navigation.state.params = {}
     Keyboard.dismiss()
   }
   componentWillReceiveProps (nextProps) {
     this.setState({
-      entry: nextProps.entry, 
+      entry: nextProps.entry,
       gratitude: nextProps.entry.entry,
     })
   }
@@ -142,7 +146,7 @@ class GratitudePrompt extends Component {
     } else {
       return
     }
-    this.changeIndex(INDICES.prompt)
+    this.setState({isVisible: false}, () => this.props.changeIndex(INDICES.feed))
   }
   toggleKeyboard = () => {
   }
@@ -174,6 +178,7 @@ class GratitudePrompt extends Component {
       console.error('invalid date!', newDate)
       throw Error('this is an invalid date')
     }
+    this.setState({ date: newDate })
     entry.date = newDate
     this.props.onChangeEntry(entry)
 
@@ -245,7 +250,7 @@ class GratitudePrompt extends Component {
               autoCorrect={true}
               multiline={true}
               onBlur={() => this.setState({ focused: false })}
-              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true)}}
+              onFocus={() => { this.setState({ focused: true }); this.containerScroller.scrollToEnd(true) }}
               style={[this.styles.input, { height: this.state.inputHeight + 6 }]}
               autoCapitalize={'sentences'}
               onChangeText={this.handleTextChange}
@@ -255,7 +260,7 @@ class GratitudePrompt extends Component {
             />
           </View>
         </ScrollView>
-        <KeyboardSpacer />
+        {Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
           <View style={this.styles.buttonContainer}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
