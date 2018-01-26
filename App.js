@@ -11,9 +11,10 @@ import { setLocalNotification, setNotificationListener } from './src/services/jo
 import { NavigationActions } from 'react-navigation'
 import { setJournalEntries, setPushEnabled, setPushTime } from './src/redux/actions/journal-actions'
 import LoadingScreen from './src/components/LoadingScreen'
+import uuidv4 from 'uuid/v4'
 export const db = Expo.SQLite.openDatabase({ name: 'test7.db' })
 
-const store = createStore(
+export const store = createStore(
   GratitudeJournal,
   {},
   compose(applyMiddleware(thunkMiddleware)),
@@ -48,8 +49,14 @@ export default class AwesomeApp extends Component {
     setNotificationListener()
     this.setState({ isReady: true });
     db.transaction(tx => {
-      tx.executeSql('create table if not exists entries (id integer primary key not null, date text, entry text);')
-      tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id))')
+      tx.executeSql('CREATE TABLE if not exists entries (id integer primary key not null, date text, entry text);')
+      tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id));')
+      tx.executeSql('ALTER TABLE entries ADD guid TEXT DEFAULT NULL;',null, ()=>console.log('success'), (e)=> {})
+      tx.executeSql('SELECT * FROM entries WHERE guid IS NULL;', [], (_, { rows: { _array } }) => {
+        _array.map(value => {
+          tx.executeSql(`UPDATE entries SET guid = ? WHERE ID = ?`,[uuidv4(), value.id],null,(e)=>console.log('update',e))
+        })
+      },(error) => console.log('select error', error))
       if (__DEV__) {
       }
       tx.executeSql(`select * from settings`, [], (_, { rows: { _array } }) => {
@@ -63,7 +70,7 @@ export default class AwesomeApp extends Component {
       tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))
       })
-    })
+    }, (error) => console.log('error!', error))
 
   }
 

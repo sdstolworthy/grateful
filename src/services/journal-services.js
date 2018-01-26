@@ -1,9 +1,12 @@
 import { db, store } from '../../App'
 import { dispatch } from 'react-redux'
 import { Alert } from 'react-native'
+import firebase from 'firebase'
+import { USER_REF, PROVIDER_USER_REF, ENTRIES_CHILD } from './firebase-constants'
 import { setJournalEntries, setPushEnabled, setPushTime } from '../redux/actions/journal-actions'
 import Expo, { Permissions, Notifications } from 'expo'
 import moment from 'moment'
+import uuidv4 from 'uuid/v4'
 async function getiOSNotificationPermission () {
   const { status } = await Permissions.getAsync(
     Permissions.NOTIFICATIONS
@@ -14,11 +17,28 @@ async function getiOSNotificationPermission () {
 }
 
 export function synchronizeDatabase () {
+  const userId = firebase.auth().currentUser.uid
+  const awaitFirebase = firebase.database().ref(`${USER_REF}${userId}`).once('value').catch(e => console.log('err', e))
   db.transaction(tx => {
     tx.executeSql('create table if not exists entries (id integer primary key not null, date text, entry text);')
     tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
-      _array.map(v => console.log(v))
-      return _array
+      awaitFirebase.then(snapshot => {
+        let updates = {}
+        _array.map(v => {
+          if (!snapshot.val().entries || !snapshot.val().entries[v.guid]) {
+            updates[USER_REF + userId + ENTRIES_CHILD + v.guid] = v
+          }
+        })
+        if (snapshot.val().entries && typeof snapshot.val().entries === 'object') {
+          Object.keys(snapshot.val().entries).map(v => {
+            const ent = _array.find(val => val.guid === v)
+            if (!ent) {
+              addEntry(snapshot.val().entries[v].entry || '', snapshot.val().entries[v].date, snapshot.val().entries[v].guid, true)
+            }
+          })
+        }
+        firebase.database().ref().update(updates)
+      })
     })
   })
 }
@@ -32,7 +52,8 @@ export function getEntries () {
   })
 }
 
-export function addEntry (entry, customDate = null) {
+export function addEntry (entry, customDate = null, guid = uuidv4(), isFirebase = false) {
+  const userId = firebase.auth().currentUser.uid
   if (!entry) {
     return
   }
@@ -40,11 +61,21 @@ export function addEntry (entry, customDate = null) {
   let arr = null
   try {
     db.transaction(tx => {
-      tx.executeSql(`insert into entries (entry, date) values (?,?)`, [entry, date])
+      tx.executeSql(`insert into entries (entry, date, guid) values (?,?,?)`, [entry, date, guid], null, error=> console.log('insert error', error))
       tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))
       })
-    })
+    }, error=> console.log('e!!', error))
+    const update = {}
+
+    if (!isFirebase) {
+      update[USER_REF + userId + ENTRIES_CHILD + guid] = {
+        entry,
+        guid,
+        date
+      }
+      firebase.database().ref().update(update)
+    }
   } catch (e) {
     console.log(e)
   }
@@ -73,7 +104,7 @@ export async function togglePushEnabled (isEnabled) {
   try {
     db.transaction(tx => {
       tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id))')
-      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushEnabled) VALUES (1, ?)',[isEnabled])
+      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushEnabled) VALUES (1, ?)', [isEnabled])
       tx.executeSql('UPDATE settings SET pushEnabled = ? WHERE id = 1', [isEnabled], () => {
         store.dispatch(setPushEnabled(isEnabled))
       })
@@ -86,7 +117,7 @@ export function setPushNotificationTime (unixTimeString) {
   try {
     db.transaction(tx => {
       tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id))')
-      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushTime) VALUES (1, ?)',[unixTimeString])
+      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushTime) VALUES (1, ?)', [unixTimeString])
       tx.executeSql('UPDATE settings SET pushTime = ? WHERE id = 1', [unixTimeString], () => {
         store.dispatch(setPushTime(unixTimeString))
       })

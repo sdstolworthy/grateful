@@ -3,8 +3,9 @@ import firebase from 'firebase'
 import secrets from '../../secrets.js'
 import { AsyncStorage } from 'react-native'
 import { navigate } from '../redux/actions/nav-actions'
-const USER_REF = '/TEST-users/'
-const PROVIDER_USER_REF = '/TEST-provider-user/'
+import { USER_REF, PROVIDER_USER_REF } from './firebase-constants'
+import { synchronizeDatabase } from './journal-services'
+
 export async function signInWithGoogleAsync () {
   try {
     const result = await Google.logInAsync({
@@ -22,19 +23,37 @@ export async function signInWithGoogleAsync () {
     AsyncStorage.setItem('access-token', result.accessToken)
     AsyncStorage.setItem('id-token', result.idToken)
     firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(result.idToken, result.accessToken)).then(response => {
-      firebase.database().ref(USER_REF + response.uid).set({
-        displayName: response.displayName,
-        email: response.email,
-        phoneNumber: response.phoneNumber,
-        emailVerified: response.emailVerified,
-        photoUrl: response.photoURL,
-        id: response.uid
-      })
+      updateFirebaseWithUserResponse(response)
     })
+    onAuthorize()
   } catch (e) {
     return { error: true }
   }
 }
+
+async function onAuthorize () {
+  synchronizeDatabase()
+}
+
+async function updateFirebaseWithUserResponse (response) {
+  let updates = {}
+  updates = {
+    displayName: response.displayName,
+    email: response.email,
+    phoneNumber: response.phoneNumber,
+    emailVerified: response.emailVerified,
+    photoUrl: response.photoURL,
+    id: response.uid
+  }
+  await firebase.database().ref(USER_REF).child(response.uid).update(updates)
+  return
+}
+
+async function checkIfUserDataExists (userId) {
+  const snapshot = await firebase.database().ref(USER_REF + userId).once('value')
+  return snapshot ? snapshot : null
+}
+
 async function getIdToken () {
   let id = ''
   await AsyncStorage.getItem('id-token').then(idToken => id = idToken)
@@ -44,7 +63,6 @@ async function getIdToken () {
 async function getToken () {
   let token = ''
   await AsyncStorage.getItem('access-token').then(user_token => token = user_token)
-  // await AsyncStorage.getAllKeys().then(keys => console.log(keys))
   return token
 }
 
@@ -57,6 +75,7 @@ export async function loginFromStorage () {
   const id = await getIdToken()
   const credential = firebase.auth.GoogleAuthProvider.credential(id, token)
   return firebase.auth().signInWithCredential(credential).then(res => {
+    onAuthorize()
     return firebase.database().ref(`${USER_REF}${res.uid}`).once('value').then(snapshot => {
       if (!snapshot.val()) {
         return false
@@ -65,7 +84,6 @@ export async function loginFromStorage () {
       }
     })
   }).catch(error => {
-    console.log('error', error)
     signInWithGoogleAsync()
   })
 }

@@ -1,6 +1,5 @@
 import React from "react";
-import { StatusBar, View } from "react-native";
-import { Container, Header, Input, Title, Left, Icon, Right, Button, Body, Content, Text, Card, CardItem, Item } from "native-base";
+import { StatusBar, View, Text, TouchableOpacity } from "react-native";
 import { Constants, LinearGradient } from 'expo'
 import { NavigationActions } from 'react-navigation'
 import { signInWithGoogleAsync, loginFromStorage } from '../../services/auth-service'
@@ -14,18 +13,27 @@ class HomeScreen extends React.Component {
   }
   login = () => {
     signInWithGoogleAsync().then(() => {
+      this.resetToPrompt()
     })
   }
+  continueWithoutLogginIn = () => {
+    this.resetToPrompt()
+  }
+  resetToPrompt = () => {
+    const navigationAction = NavigationActions.reset({
+      index: 0,
+      actions: [
+        NavigationActions.navigate({ routeName: 'Prompt' })
+      ]
+    })
+    this.props.navigation.dispatch(navigationAction)
+  }
   componentWillMount () {
-    synchronizeDatabase()
     const authPromise = loginFromStorage().then(user => {
-      const navigationAction = NavigationActions.reset({
-        index: 0,
-        actions: [
-          NavigationActions.navigate({ routeName: 'Prompt' })
-        ]
-      })
-      this.props.navigation.dispatch(navigationAction)
+      if (true) {
+        throw Error ('i dont want to')
+      }
+      this.resetToPrompt()
     }).catch(e => console.warn('error', e))
   }
   render () {
@@ -36,9 +44,12 @@ class HomeScreen extends React.Component {
         end={[.3, 1]}
         style={{ flex: 1 }}
       >
-        <Button onPress={this.login}>
-          <Text>Click me</Text>
-        </Button>
+      <TouchableOpacity onPress={this.login}>
+        <Text>Log in with Google</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={this.continueWithoutLogginIn}>
+        <Text>Continue without Logging In</Text>
+      </TouchableOpacity>
       </LinearGradient>
     )
   }

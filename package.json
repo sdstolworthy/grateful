@@ -36,6 +36,7 @@
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
     "typeface-quicksand": "^0.0.40",
+    "uuid": "^3.2.1",
     "watchman": "^0.1.8"
   }
 }
