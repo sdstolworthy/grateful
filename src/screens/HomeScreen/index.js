@@ -20,8 +20,16 @@ class HomeScreen extends React.Component {
       hasLoaded: false
     }
   }
+  componentWillUnmount () {
+    this.setState({hasLoaded: false})
+  }
+  componentWillMount() {
+    this.setState({hasLoaded: false})
+    if (this.props.providerConnected !== null) {
+      this.setState({hasLoaded: true}, () => this.handleLoginSequence(this.props))
+    }
+  }
   componentWillReceiveProps (nextProps) {
-    console.log('provcon', nextProps.providerConnected)
     if (nextProps.providerConnected !== null && !this.state.hasLoaded) {
       this.setState({hasLoaded: true}, () => this.handleLoginSequence(nextProps))
     }

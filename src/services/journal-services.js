@@ -73,7 +73,6 @@ export function addEntry (entry, customDate = null, guid = uuidv4(), isFirebase 
       })
     }, error => console.log('e!!', error))
     const update = {}
-
     if (!isFirebase && userId) {
       update[USER_REF + userId + ENTRIES_CHILD + guid] = {
         entry,
@@ -90,7 +89,8 @@ export function editEntry (entry) {
   let userId = null
   if (firebase.auth().currentUser) {
     userId = firebase.auth().currentUser.uid
-  }  if (!entry) {
+  }
+  if (!entry) {
     return
   }
   try {
@@ -144,6 +144,10 @@ export function setPushNotificationTime (unixTimeString) {
   }
 }
 export function deleteEntry (entry) {
+  let userId = null
+  if (firebase.auth().currentUser) {
+    userId = firebase.auth().currentUser.uid
+  }
   if (!entry) {
     return
   }
@@ -154,7 +158,11 @@ export function deleteEntry (entry) {
         store.dispatch(setJournalEntries(_array))
       })
     })
-    firebase.database().ref(USER_REF + userId + ENTRIES_CHILD + guid).remove()
+    if (userId){
+      firebase.database().ref(USER_REF).child(userId).child(ENTRIES_CHILD).child(entry.guid).remove().then(() => {
+        console.log('removed')
+      }).catch(e=> console.log('delete error', e))
+    }
   } catch (e) {
     console.log(e)
   }

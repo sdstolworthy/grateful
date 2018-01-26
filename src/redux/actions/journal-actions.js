@@ -35,7 +35,6 @@ export function setPushTime (unixTimeString) {
 }
 
 export function setProviderStatus (providerStatus) {
-  console.log(providerStatus)
   return {
     type: SET_PROVIDER_CONNECTED,
     payload: providerStatus

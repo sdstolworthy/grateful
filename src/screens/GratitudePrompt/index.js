@@ -41,7 +41,7 @@ class GratitudePrompt extends Component {
       slideAnim: new Animated.Value(-700),
       datePickerHeight: -700,
       datePickerVisible: false,
-      showModal: true
+      showModal: false,
     }
     this.selectDate = this.selectDate.bind(this)
   }
