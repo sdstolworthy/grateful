@@ -25,6 +25,7 @@ import { addEntry, editEntry, deleteEntry } from '../../services/journal-service
 import { Octicons, Entypo, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import moment from 'moment'
 import ConfirmModal from '../../components/ConfirmModal'
+import SettingsModal from '../SettingsModal'
 import DatePickerIosModal from '../../components/DatePickerIos'
 import { INDICES } from '../index'
 class GratitudePrompt extends Component {
@@ -39,7 +40,8 @@ class GratitudePrompt extends Component {
       date: (new Date).valueOf().toString(),
       slideAnim: new Animated.Value(-700),
       datePickerHeight: -700,
-      datePickerVisible: false
+      datePickerVisible: false,
+      showModal: true
     }
     this.selectDate = this.selectDate.bind(this)
   }
@@ -153,6 +155,15 @@ class GratitudePrompt extends Component {
       slideAnim: new Animated.Value(-1 * event.nativeEvent.layout.height)
     })
   }
+  handleLogout = () => {
+    const navigationAction = NavigationActions.reset({
+      index: 0,
+      actions: [
+        NavigationActions.navigate({ routeName: 'Login' })
+      ]
+    })
+    this.props.navigation.dispatch(navigationAction)
+  }
   render () {
     const { entry } = this.props
     const screenHeight = Dimensions.get('window').height
@@ -209,9 +220,9 @@ class GratitudePrompt extends Component {
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
           <View style={this.styles.buttonContainer}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-              {/* <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.props.navigation.navigate('DrawerOpen')}>
+              <TouchableOpacity key={'drawer'} style={this.styles.headerButton} onPress={() => this.setState({showModal: true})}>
                 <Ionicons name='ios-menu-outline' style={this.styles.headerIcons} />
-              </TouchableOpacity> */}
+              </TouchableOpacity>
               {this.props.isUpdate ? buttons : <View />}
             </View>
             <View style={{ flexDirection: 'row' }}>
@@ -228,6 +239,11 @@ class GratitudePrompt extends Component {
           buttons={['Cancel', 'Delete']}
           prompt={'Delete this memory?'}
           status={'warning'}
+        />
+        <SettingsModal 
+          visible={this.state.showModal}
+          handleClose={()=>this.setState({showModal:false})}
+          handleLogout={this.handleLogout}
         />
         {this.state.datePickerVisible
           ? <View

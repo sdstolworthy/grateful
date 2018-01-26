@@ -3,7 +3,7 @@ import firebase from 'firebase'
 import secrets from '../../secrets.js'
 import { AsyncStorage } from 'react-native'
 import { navigate } from '../redux/actions/nav-actions'
-import { setProviderConnected } from '../redux/actions/journal-actions'
+import { setProviderConnected, setUser } from '../redux/actions/journal-actions'
 import { USER_REF, PROVIDER_USER_REF } from './firebase-constants'
 import { synchronizeDatabase } from './journal-services'
 import { db, store } from '../../App'
@@ -24,7 +24,9 @@ export function signInWithGoogleAsync () {
     AsyncStorage.setItem('access-token', result.accessToken)
     AsyncStorage.setItem('id-token', result.idToken)
     firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(result.idToken, result.accessToken)).then(response => {
-      updateFirebaseWithUserResponse(response)
+      onAuthorize(response)
+    }).catch(e => {
+      throw Error(e)
     })
     store.dispatch(setProviderConnected(2))
     onAuthorize()
@@ -34,33 +36,49 @@ export function signInWithGoogleAsync () {
 }
 
 export async function setProviderChoice (choice) {
+  return new Promise((resolve, reject) => {
+    try {
+      db.transaction(tx => {
+        tx.executeSql('UPDATE settings SET providerChoice = ? WHERE id = 1;', [choice], (e) => {
+          resolve()
+        },
+          (e) => reject())
+      })
+    } catch (e) {
+      reject()
+      console.log(e)
+    }
+  })
+}
+
+async function onAuthorize (response) {
+  synchronizeDatabase(response)
+  updateFirebaseWithUserResponse(response)
+}
+
+function updateFirebaseWithUserResponse (response = firebase.auth().currentUser) {
+  let updates = {}
   try {
-    db.transaction(tx => {
-      tx.executeSql('UPDATE settings SET providerChoice = ? WHERE id = 1;', [choice], (e) => {
-      },
-      (e)=>console.log('settings error', e))
-    })
+    updates = {
+      displayName: response.displayName,
+      email: response.email,
+      phoneNumber: response.phoneNumber,
+      emailVerified: response.emailVerified,
+      photoUrl: response.photoURL,
+      uid: response.uid
+    }
+    store.dispatch(setUser(updates))
+    return firebase.database().ref(USER_REF).child(response.uid).update(updates)
   } catch (e) {
     console.log(e)
   }
 }
 
-async function onAuthorize () {
-  synchronizeDatabase()
-}
-
-async function updateFirebaseWithUserResponse (response) {
-  let updates = {}
-  updates = {
-    displayName: response.displayName,
-    email: response.email,
-    phoneNumber: response.phoneNumber,
-    emailVerified: response.emailVerified,
-    photoUrl: response.photoURL,
-    id: response.uid
-  }
-  await firebase.database().ref(USER_REF).child(response.uid).update(updates)
-  return
+export function logout () {
+  return firebase.auth().signOut().then(() => {
+  }).catch(e => {
+    console.log(e)
+  })
 }
 
 async function checkIfUserDataExists (userId) {
@@ -92,7 +110,7 @@ export async function loginFromStorage () {
   }
   const credential = firebase.auth.GoogleAuthProvider.credential(id, token)
   return firebase.auth().signInWithCredential(credential).then(res => {
-    onAuthorize()
+    onAuthorize(res)
     return firebase.database().ref(`${USER_REF}${res.uid}`).once('value').then(snapshot => {
       if (!snapshot.val()) {
         throw Error('error fetching user')
@@ -102,6 +120,6 @@ export async function loginFromStorage () {
       }
     })
   }).catch(error => {
-   throw Error(error)
+    throw Error(error)
   })
 }

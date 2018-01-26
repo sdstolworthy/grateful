@@ -4,7 +4,8 @@ import {
   SET_PUSH_ENABLED, 
   SET_PUSH_TIME,
   SET_PROVIDER_CONNECTED,
-  SET_LOADING_STATUS
+  SET_LOADING_STATUS,
+  SET_USER
 } from '../actions/journal-actions'
 
 const initialState = {
@@ -13,42 +14,49 @@ const initialState = {
   pushEnabled: true,
   pushTime: null,
   providerConnected: null,
-  loading: true
+  loading: true,
+  user: null
 }
 export default function journal(state = initialState, {type, payload}) {
+  const newState = Object.assign({}, state)
   switch(type) {
     case ADD_JOURNAL_ENTRY:
       return {
-        ...state,
+        ...newState,
         entries: [
-          ...state.entries,
+          ...newState.entries,
           payload
         ]
       }
     case SET_JOURNAL_ENTRIES:
       return {
-        ...state,
+        ...newState,
         entries: payload
       }
     case SET_PUSH_ENABLED:
       return {
-        ...state,
+        ...newState,
         pushEnabled: payload
       }
     case SET_PUSH_TIME:
       return {
-        ...state,
+        ...newState,
         pushTime: payload
       }
     case SET_PROVIDER_CONNECTED:
       return {
-        ...state,
+        ...newState,
         providerConnected: payload
       }
     case SET_LOADING_STATUS:
       return {
-        ...state,
+        ...newState,
         loading: payload
+      }
+    case SET_USER:
+      return {
+        ...newState,
+        user: payload
       }
     default:
       return state

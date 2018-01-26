@@ -72,6 +72,7 @@ class HomeSwiper extends Component {
             changeIndex={this.updateSwiper}
             entry={this.state.entry}
             onChangeEntry={this.selectEntry}
+            navigation={this.props.navigation}
           />
         </View>
         <View style={{ flex: 1 }}>

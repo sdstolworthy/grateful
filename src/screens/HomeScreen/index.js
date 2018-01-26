@@ -21,7 +21,7 @@ class HomeScreen extends React.Component {
     }
   }
   componentWillReceiveProps (nextProps) {
-    console.log(nextProps)
+    console.log('provcon', nextProps.providerConnected)
     if (nextProps.providerConnected !== null && !this.state.hasLoaded) {
       this.setState({hasLoaded: true}, () => this.handleLoginSequence(nextProps))
     }

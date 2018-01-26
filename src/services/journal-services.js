@@ -16,7 +16,10 @@ async function getiOSNotificationPermission () {
   }
 }
 
-export function synchronizeDatabase () {
+export function synchronizeDatabase (response) {
+  if (!firebase.auth().currentUser) {
+    return
+  }
   const userId = firebase.auth().currentUser.uid
   const awaitFirebase = firebase.database().ref(`${USER_REF}${userId}`).once('value').catch(e => console.log('err', e))
   db.transaction(tx => {
@@ -53,7 +56,10 @@ export function getEntries () {
 }
 
 export function addEntry (entry, customDate = null, guid = uuidv4(), isFirebase = false) {
-  const userId = firebase.auth().currentUser.uid
+  let userId = null
+  if (firebase.auth().currentUser) {
+    userId = firebase.auth().currentUser.uid
+  }
   if (!entry) {
     return
   }
@@ -61,14 +67,14 @@ export function addEntry (entry, customDate = null, guid = uuidv4(), isFirebase 
   let arr = null
   try {
     db.transaction(tx => {
-      tx.executeSql(`insert into entries (entry, date, guid) values (?,?,?)`, [entry, date, guid], null, error=> console.log('insert error', error))
+      tx.executeSql(`insert into entries (entry, date, guid) values (?,?,?)`, [entry, date, guid], null, error => console.log('insert error', error))
       tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))
       })
-    }, error=> console.log('e!!', error))
+    }, error => console.log('e!!', error))
     const update = {}
 
-    if (!isFirebase) {
+    if (!isFirebase && userId) {
       update[USER_REF + userId + ENTRIES_CHILD + guid] = {
         entry,
         guid,
@@ -81,8 +87,10 @@ export function addEntry (entry, customDate = null, guid = uuidv4(), isFirebase 
   }
 }
 export function editEntry (entry) {
-  const userId = firebase.auth().currentUser.uid
-  if (!entry) {
+  let userId = null
+  if (firebase.auth().currentUser) {
+    userId = firebase.auth().currentUser.uid
+  }  if (!entry) {
     return
   }
   try {
@@ -92,12 +100,14 @@ export function editEntry (entry) {
         store.dispatch(setJournalEntries(_array))
       })
     })
-    update[USER_REF + userId + ENTRIES_CHILD + guid] = {
-      entry: entry.entry,
-      guid: entry.guid,
-      date: entry.date,
+    if (userId) {
+      update[USER_REF + userId + ENTRIES_CHILD + guid] = {
+        entry: entry.entry,
+        guid: entry.guid,
+        date: entry.date,
+      }
+      firebase.database().ref().update(update)
     }
-    firebase.database().ref().update(update)
   } catch (e) {
     console.log(e)
   }

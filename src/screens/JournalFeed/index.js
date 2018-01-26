@@ -35,7 +35,9 @@ class JournalFeed extends Component {
     this.groupedByDate = {}
     this.editButtonVisibleTimeout
   }
-
+  componentWillUnmount () {
+    clearTimeout(this.editButtonVisibleTimeout)
+  }
   componentDidMount () {
     db.transaction(tx => {
       tx.executeSql(
