@@ -16,23 +16,48 @@ class HomeScreen extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      isPressed: false
+      isPressed: false,
+      hasLoaded: false
     }
   }
-  componentWillMount () {
-    loginFromStorage().then(user => {
-      if (true) {
-        throw Error('i dont want to')
+  componentWillReceiveProps (nextProps) {
+    console.log(nextProps)
+    if (nextProps.providerConnected !== null && !this.state.hasLoaded) {
+      console.log('loading')
+      this.setState({hasLoaded: true}, () => this.handleLoginSequence(nextProps))
+    }
+  }
+  handleLoginSequence = (props = this.props) => {
+    const { providerConnected } = props
+    console.log('provConn', providerConnected)
+    if (parseInt(providerConnected, 10) === 2) {
+      try {
+        console.log('test')
+        loginFromStorage().then(user => {
+          // if (true) {
+          //   throw Error('i dont want to')
+          // }
+          this.resetToPrompt()
+        }).catch(e => {
+          this.props.toggleLoading(false)
+          console.log('error', e)
+        })
+      } catch (e) {
+        this.props.toggleLoading(false)
+        console.log(e)
       }
-      this.resetToPrompt()
-    }).catch(e => {
+    } else if (providerConnected === 0) {
       this.props.toggleLoading(false)
-      console.log('error', e)
-    })
+    } else {
+      this.props.toggleLoading(false)
+      this.resetToPrompt()
+    }
   }
   login = () => {
     signInWithGoogleAsync().then(() => {
       this.resetToPrompt()
+    }).catch(e => {
+      this.props.toggleLoading(false)
     })
   }
   continueWithoutLoggingIn = () => {
@@ -110,6 +135,7 @@ class HomeScreen extends React.Component {
 
 const mstp = ({ Journals }, ownProps) => ({
   loading: Journals.loading,
+  providerConnected: Journals.providerConnected
 })
 
 const mdtp = (dispatch) => ({

@@ -59,8 +59,20 @@ export default class AwesomeApp extends Component {
       tx.executeSql('CREATE TABLE if not exists entries (id integer primary key not null, date text, entry text);')
       tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id));')
       tx.executeSql('ALTER TABLE entries ADD guid TEXT DEFAULT NULL;',null, ()=>console.log('success'), (e)=> {})
-      tx.executeSql('ALTER TABLE settings ADD providerChoice INT DEFAULT 0',null,null, ()=>console.info('e'), (e)=> {})
-      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushEnabled) VALUES (1, ?)', [false])
+      tx.executeSql('ALTER TABLE settings ADD providerChoice INT;',null,null, (e)=>console.info('alter settings',e))
+      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushEnabled) VALUES (1, ?);', [false])
+      tx.executeSql(`select * from settings`, [], (_, { rows: { _array } }) => {
+        if (_array[0]) {
+          console.log('arr',_array[0])
+          store.dispatch(setProviderConnected(_array[0].providerChoice))
+          store.dispatch(setPushEnabled(_array[0].pushEnabled === 'true' ? true : false))
+          store.dispatch(setPushTime(_array[0].pushTime))
+        } else {
+          console.log('arrerr', _array)
+          store.dispatch(setProviderConnected(0))
+          store.dispatch(setPushEnabled(false))
+        }
+      })
       tx.executeSql('SELECT * FROM entries WHERE guid IS NULL;', [], (_, { rows: { _array } }) => {
         _array.map(value => {
           tx.executeSql(`UPDATE entries SET guid = ? WHERE ID = ?`,[uuidv4(), value.id],null,(e)=>console.log('update',e))
@@ -68,16 +80,6 @@ export default class AwesomeApp extends Component {
       },(error) => console.log('select error', error))
       if (__DEV__) {
       }
-      tx.executeSql(`select * from settings`, [], (_, { rows: { _array } }) => {
-        if (_array[0]) {
-          store.dispatch(setProviderConnected(_array[0].providerChoice))
-          store.dispatch(setPushEnabled(_array[0].pushEnabled === 'true' ? true : false))
-          store.dispatch(setPushTime(_array[0].pushTime))
-        } else {
-          store.dispatch(setProviderConnected(0))
-          store.dispatch(setPushEnabled(false))
-        }
-      })
       tx.executeSql(`select * from entries`, [], (_, { rows: { _array } }) => {
         store.dispatch(setJournalEntries(_array))
       })

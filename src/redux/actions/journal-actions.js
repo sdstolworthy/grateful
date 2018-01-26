@@ -1,4 +1,5 @@
 import { getEntries, addEntry } from '../../services/journal-services'
+import * as AuthService from '../../services/auth-service'
 
 export const SET_JOURNAL_ENTRIES = '[Feed] Get all journal entries'
 export const ADD_JOURNAL_ENTRY = '[Journal] Add Journal Entry'
@@ -23,7 +24,7 @@ export function setPushTime (unixTimeString) {
   }
 }
 
-export function setProviderConnected (providerStatus) {
+export function setProviderStatus (providerStatus) {
   return {
     type: SET_PROVIDER_CONNECTED,
     payload: providerStatus
@@ -60,5 +61,12 @@ export function createEntry (entry) {
 export function getJournalEntries (entries) {
   return (dispatch) => {
     dispatch(setJournalEntries(getEntries()))
+  }
+}
+
+export function setProviderConnected (choice) {
+  return (dispatch) => {
+    AuthService.setProviderChoice(choice)
+    dispatch(setProviderStatus(choice))
   }
 }

@@ -12,7 +12,7 @@ const initialState = {
   loading: false,
   pushEnabled: true,
   pushTime: null,
-  providerConnected: 0,
+  providerConnected: null,
   loading: true
 }
 export default function journal(state = initialState, {type, payload}) {

@@ -6,10 +6,10 @@ import { navigate } from '../redux/actions/nav-actions'
 import { setProviderConnected } from '../redux/actions/journal-actions'
 import { USER_REF, PROVIDER_USER_REF } from './firebase-constants'
 import { synchronizeDatabase } from './journal-services'
-import { db } from '../../App'
+import { db, store } from '../../App'
 
 export function signInWithGoogleAsync () {
-  return result = Google.logInAsync({
+  return Google.logInAsync({
     androidClientId: secrets.androidClient,
     iosClientId: secrets.iosClient,
     scopes: ['profile', 'email'],
@@ -26,18 +26,19 @@ export function signInWithGoogleAsync () {
     firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(result.idToken, result.accessToken)).then(response => {
       updateFirebaseWithUserResponse(response)
     })
+    store.dispatch(setProviderConnected(2))
     onAuthorize()
   }).catch(e => {
-    return e
+    throw Error(e)
   })
 }
 
-async function setProviderChoice (choice) {
+export async function setProviderChoice (choice) {
   try {
     db.transaction(tx => {
-      tx.executeSql('UPDATE settings SET providerChoice = ? WHERE id = 1', [choice], () => {
-        store.dispatch(setProviderConnected(choice))
-      })
+      tx.executeSql('UPDATE settings SET providerChoice = ? WHERE id = 1;', [choice], (e) => {
+      },
+      (e)=>console.log('settings error', e))
     })
   } catch (e) {
     console.log(e)
@@ -86,6 +87,9 @@ function setToken (token) {
 export async function loginFromStorage () {
   const token = await getToken()
   const id = await getIdToken()
+  if (!token || !id) {
+    throw Error('Token or Id is not valid.')
+  }
   const credential = firebase.auth.GoogleAuthProvider.credential(id, token)
   return firebase.auth().signInWithCredential(credential).then(res => {
     onAuthorize()
@@ -93,10 +97,11 @@ export async function loginFromStorage () {
       if (!snapshot.val()) {
         throw Error('error fetching user')
       } else {
+        store.dispatch(setProviderConnected(2))
         return snapshot.val()
       }
     })
   }).catch(error => {
-    return error
+   throw Error(error)
   })
 }
