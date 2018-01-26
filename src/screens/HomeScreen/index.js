@@ -23,16 +23,13 @@ class HomeScreen extends React.Component {
   componentWillReceiveProps (nextProps) {
     console.log(nextProps)
     if (nextProps.providerConnected !== null && !this.state.hasLoaded) {
-      console.log('loading')
       this.setState({hasLoaded: true}, () => this.handleLoginSequence(nextProps))
     }
   }
   handleLoginSequence = (props = this.props) => {
     const { providerConnected } = props
-    console.log('provConn', providerConnected)
     if (parseInt(providerConnected, 10) === 2) {
       try {
-        console.log('test')
         loginFromStorage().then(user => {
           // if (true) {
           //   throw Error('i dont want to')
