@@ -49,7 +49,11 @@ class GratitudePrompt extends Component {
     try {
       entry = Object.assign({}, this.props.navigation.state.params.entry)
     } catch (e) { }
-    this.setState({ entry, gratitude: entry.entry })
+    this.setState({
+      entry,
+      gratitude: entry.entry,
+      date: entry.date || new Date().valueOf()
+    })
     // this.props.navigation.state.params = {}
     Keyboard.dismiss()
   }
@@ -86,7 +90,7 @@ class GratitudePrompt extends Component {
     } else {
       return
     }
-    this.changeIndex(INDICES.prompt)
+    this.setState({isVisible: false}, () => this.props.changeIndex(INDICES.feed))
   }
   toggleKeyboard = () => {
   }
@@ -118,6 +122,7 @@ class GratitudePrompt extends Component {
       console.error('invalid date!', newDate)
       throw Error('this is an invalid date')
     }
+    this.setState({ date: newDate })
     entry.date = newDate
     this.props.onChangeEntry(entry)
 
@@ -200,7 +205,7 @@ class GratitudePrompt extends Component {
             />
           </View>
         </ScrollView>
-        <KeyboardSpacer />
+        {Platform.OS === 'ios' ? <KeyboardSpacer /> : null}
         <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss() }}>
           <View style={this.styles.buttonContainer}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>

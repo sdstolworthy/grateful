@@ -2,18 +2,24 @@
   "expo": {
     "name": "Grateful: Give Thanks Daily",
     "icon": "./assets/images/playstore-icon.png",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "slug": "gratitude-journal",
     "sdkVersion": "21.0.0",
     "androidStatusBar": {
       "backgroundColor": "#000000"
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 8,
       "package" : "com.spencerds.gratitude"
     },
     "ios": {
-      "bundleIdentifier": "com.spencerds.gratitude"
+      "bundleIdentifier": "com.spencerds.gratitude",
+      "buildNumber": "7"
+    },
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#335AE9"
     }
   }
 }
