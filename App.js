@@ -9,7 +9,7 @@ import GratitudeJournal from './src/redux/reducers'
 import { loginFromStorage } from './src/services/auth-service'
 import { setLocalNotification, setNotificationListener } from './src/services/journal-services'
 import { NavigationActions } from 'react-navigation'
-import { setJournalEntries, setPushEnabled, setPushTime } from './src/redux/actions/journal-actions'
+import { setJournalEntries, setPushEnabled, setPushTime, setProviderConnected } from './src/redux/actions/journal-actions'
 import LoadingScreen from './src/components/LoadingScreen'
 import uuidv4 from 'uuid/v4'
 
@@ -59,7 +59,7 @@ export default class AwesomeApp extends Component {
       tx.executeSql('CREATE TABLE if not exists entries (id integer primary key not null, date text, entry text);')
       tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id));')
       tx.executeSql('ALTER TABLE entries ADD guid TEXT DEFAULT NULL;',null, ()=>console.log('success'), (e)=> {})
-      tx.executeSql('ALTER TABLE settings ADD providerChoice INT DEFAULT 0')
+      tx.executeSql('ALTER TABLE settings ADD providerChoice INT DEFAULT 0',null,null, ()=>console.info('e'), (e)=> {})
       tx.executeSql('INSERT OR IGNORE INTO settings (id, pushEnabled) VALUES (1, ?)', [false])
       tx.executeSql('SELECT * FROM entries WHERE guid IS NULL;', [], (_, { rows: { _array } }) => {
         _array.map(value => {
@@ -70,9 +70,11 @@ export default class AwesomeApp extends Component {
       }
       tx.executeSql(`select * from settings`, [], (_, { rows: { _array } }) => {
         if (_array[0]) {
+          store.dispatch(setProviderConnected(_array[0].providerChoice))
           store.dispatch(setPushEnabled(_array[0].pushEnabled === 'true' ? true : false))
           store.dispatch(setPushTime(_array[0].pushTime))
         } else {
+          store.dispatch(setProviderConnected(0))
           store.dispatch(setPushEnabled(false))
         }
       })

@@ -7,6 +7,7 @@ import JournalFeed from './JournalFeed'
 import SideBar from "../components/SideBar.js";
 import GratitudePrompt from '../screens/GratitudePrompt'
 import Swiper from 'react-native-swiper'
+import { connect } from 'react-redux'
 import {
   StackNavigator
 } from "react-navigation";
@@ -94,4 +95,9 @@ const HomeScreenRouter = StackNavigator({
 }, {
     headerMode: 'none',
   });
+
+mstp = ({Journals}) => ({
+  providerConnected: Journals.providerConnected,
+  loading: Journals.loading
+})
 export default HomeScreenRouter;

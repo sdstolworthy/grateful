@@ -8,13 +8,12 @@ import { USER_REF, PROVIDER_USER_REF } from './firebase-constants'
 import { synchronizeDatabase } from './journal-services'
 import { db } from '../../App'
 
-export async function signInWithGoogleAsync () {
-  try {
-    const result = await Google.logInAsync({
-      androidClientId: secrets.androidClient,
-      iosClientId: secrets.iosClient,
-      scopes: ['profile', 'email'],
-    })
+export function signInWithGoogleAsync () {
+  return result = Google.logInAsync({
+    androidClientId: secrets.androidClient,
+    iosClientId: secrets.iosClient,
+    scopes: ['profile', 'email'],
+  }).then(result => {
     const credential = {
       provider: 'google',
       token: result.idToken,
@@ -28,9 +27,9 @@ export async function signInWithGoogleAsync () {
       updateFirebaseWithUserResponse(response)
     })
     onAuthorize()
-  } catch (e) {
-    return { error: true }
-  }
+  }).catch(e => {
+    return e
+  })
 }
 
 async function setProviderChoice (choice) {
@@ -92,12 +91,12 @@ export async function loginFromStorage () {
     onAuthorize()
     return firebase.database().ref(`${USER_REF}${res.uid}`).once('value').then(snapshot => {
       if (!snapshot.val()) {
-        return false
+        throw Error('error fetching user')
       } else {
         return snapshot.val()
       }
     })
   }).catch(error => {
-    signInWithGoogleAsync()
+    return error
   })
 }

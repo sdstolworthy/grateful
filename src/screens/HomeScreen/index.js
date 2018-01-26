@@ -2,7 +2,7 @@ import React from "react";
 import { StatusBar, View, Text, TouchableWithoutFeedback, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Constants, LinearGradient } from 'expo'
 import { NavigationActions } from 'react-navigation'
-import { setProviderConnected } from '../../redux/actions/journal-actions'
+import { setProviderConnected, setLoadingStatus } from '../../redux/actions/journal-actions'
 import { signInWithGoogleAsync, loginFromStorage } from '../../services/auth-service'
 import StatusBumper from '../../components/StatusBumper'
 import { connect } from 'react-redux'
@@ -20,12 +20,15 @@ class HomeScreen extends React.Component {
     }
   }
   componentWillMount () {
-    const authPromise = loginFromStorage().then(user => {
+    loginFromStorage().then(user => {
       if (true) {
         throw Error('i dont want to')
       }
       this.resetToPrompt()
-    }).catch(e => console.log('error', e))
+    }).catch(e => {
+      this.props.toggleLoading(false)
+      console.log('error', e)
+    })
   }
   login = () => {
     signInWithGoogleAsync().then(() => {
@@ -33,7 +36,7 @@ class HomeScreen extends React.Component {
     })
   }
   continueWithoutLoggingIn = () => {
-    this.props.setProviderConnected(1)
+    this.props.setProviderStatus(1)
     this.resetToPrompt()
   }
   resetToPrompt = () => {
@@ -45,9 +48,8 @@ class HomeScreen extends React.Component {
     })
     this.props.navigation.dispatch(navigationAction)
   }
-
   render () {
-    return (
+    const loginScreen = (
       <LinearGradient
         colors={['#4E7AC7', '#35478C']}
         start={[.1, .1]}
@@ -79,6 +81,15 @@ class HomeScreen extends React.Component {
         </TouchableOpacity>
       </LinearGradient>
     )
+    const loadingScreen = (
+      <LinearGradient
+        colors={['#4E7AC7', '#35478C']}
+        start={[.1, .1]}
+        end={[.3, 1]}
+        style={this.styles.container}
+      />
+    )
+    return this.props.loading ? loadingScreen : loginScreen
   }
   styles = StyleSheet.create({
     container: {
@@ -97,10 +108,13 @@ class HomeScreen extends React.Component {
   })
 }
 
-const mstp = (state, ownProps) => ({})
+const mstp = ({ Journals }, ownProps) => ({
+  loading: Journals.loading,
+})
 
 const mdtp = (dispatch) => ({
-  setProviderStatus: (statusCode) => dispatch(setProviderConnected(statusCode))
+  setProviderStatus: (statusCode) => dispatch(setProviderConnected(statusCode)),
+  toggleLoading: (status) => dispatch(setLoadingStatus(status))
 })
 
 export default connect(mstp, mdtp)(HomeScreen)

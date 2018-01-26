@@ -6,6 +6,8 @@ export const ADD_JOURNAL_ENTRY = '[Journal] Add Journal Entry'
 export const SET_PUSH_ENABLED = '[Journal] Set push enabled setting'
 export const SET_PUSH_TIME = '[Journal] Set push time'
 
+export const SET_LOADING_STATUS = '[Journal] loading toggled'
+
 export const SET_PROVIDER_CONNECTED = '[AUTH] Set Provider Status'
 export function setPushEnabled (isEnabled) {
   return {
@@ -39,6 +41,13 @@ export function setJournalEntries (entries) {
   return {
     type: SET_JOURNAL_ENTRIES,
     payload: entries
+  }
+}
+
+export function setLoadingStatus (status) {
+  return {
+    type: SET_LOADING_STATUS,
+    payload: status
   }
 }
 
