@@ -34,7 +34,7 @@ class HomeScreen extends React.Component {
         throw Error ('i dont want to')
       }
       this.resetToPrompt()
-    }).catch(e => console.warn('error', e))
+    }).catch(e => console.log('error', e))
   }
   render () {
     return (

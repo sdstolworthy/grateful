@@ -90,7 +90,7 @@ class SideBar extends React.Component {
           this.handleUpdateDate({hour, minute})
         }
       } catch ({ code, message }) {
-        console.warn('Cannot open time picker', message)
+        console.log('Cannot open time picker', message)
       }
 
     }
