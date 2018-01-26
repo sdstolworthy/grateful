@@ -25,7 +25,7 @@ export function synchronizeDatabase () {
       awaitFirebase.then(snapshot => {
         let updates = {}
         _array.map(v => {
-          if (!snapshot.val().entries || !snapshot.val().entries[v.guid]) {
+          if (!snapshot.val().hasOwnProperty('entries') || !snapshot.val().entries[v.guid]) {
             updates[USER_REF + userId + ENTRIES_CHILD + v.guid] = v
           }
         })
@@ -81,6 +81,7 @@ export function addEntry (entry, customDate = null, guid = uuidv4(), isFirebase 
   }
 }
 export function editEntry (entry) {
+  const userId = firebase.auth().currentUser.uid
   if (!entry) {
     return
   }
@@ -91,6 +92,12 @@ export function editEntry (entry) {
         store.dispatch(setJournalEntries(_array))
       })
     })
+    update[USER_REF + userId + ENTRIES_CHILD + guid] = {
+      entry: entry.entry,
+      guid: entry.guid,
+      date: entry.date,
+    }
+    firebase.database().ref().update(update)
   } catch (e) {
     console.log(e)
   }
@@ -137,6 +144,7 @@ export function deleteEntry (entry) {
         store.dispatch(setJournalEntries(_array))
       })
     })
+    firebase.database().ref(USER_REF + userId + ENTRIES_CHILD + guid).remove()
   } catch (e) {
     console.log(e)
   }

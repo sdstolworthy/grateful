@@ -12,7 +12,14 @@ import { NavigationActions } from 'react-navigation'
 import { setJournalEntries, setPushEnabled, setPushTime } from './src/redux/actions/journal-actions'
 import LoadingScreen from './src/components/LoadingScreen'
 import uuidv4 from 'uuid/v4'
+
 export const db = Expo.SQLite.openDatabase({ name: 'test7.db' })
+
+const providerChoiceMap = {
+  noneTaken: 0,
+  dismissed: 1,
+  connected: 2
+}
 
 export const store = createStore(
   GratitudeJournal,
@@ -52,6 +59,8 @@ export default class AwesomeApp extends Component {
       tx.executeSql('CREATE TABLE if not exists entries (id integer primary key not null, date text, entry text);')
       tx.executeSql('CREATE TABLE if not exists settings (id integer primary key not null, pushEnabled BOOLEAN, pushTime TEXT, UNIQUE(id));')
       tx.executeSql('ALTER TABLE entries ADD guid TEXT DEFAULT NULL;',null, ()=>console.log('success'), (e)=> {})
+      tx.executeSql('ALTER TABLE settings ADD providerChoice INT DEFAULT 0')
+      tx.executeSql('INSERT OR IGNORE INTO settings (id, pushEnabled) VALUES (1, ?)', [false])
       tx.executeSql('SELECT * FROM entries WHERE guid IS NULL;', [], (_, { rows: { _array } }) => {
         _array.map(value => {
           tx.executeSql(`UPDATE entries SET guid = ? WHERE ID = ?`,[uuidv4(), value.id],null,(e)=>console.log('update',e))

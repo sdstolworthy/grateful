@@ -5,6 +5,8 @@ export const ADD_JOURNAL_ENTRY = '[Journal] Add Journal Entry'
 
 export const SET_PUSH_ENABLED = '[Journal] Set push enabled setting'
 export const SET_PUSH_TIME = '[Journal] Set push time'
+
+export const SET_PROVIDER_CONNECTED = '[AUTH] Set Provider Status'
 export function setPushEnabled (isEnabled) {
   return {
     type: SET_PUSH_ENABLED,
@@ -16,6 +18,13 @@ export function setPushTime (unixTimeString) {
   return {
     type: SET_PUSH_TIME,
     payload: unixTimeString
+  }
+}
+
+export function setProviderConnected (providerStatus) {
+  return {
+    type: SET_PROVIDER_CONNECTED,
+    payload: providerStatus
   }
 }
 

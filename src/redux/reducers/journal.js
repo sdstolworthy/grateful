@@ -1,10 +1,17 @@
-import {ADD_JOURNAL_ENTRY,SET_JOURNAL_ENTRIES, SET_PUSH_ENABLED, SET_PUSH_TIME} from '../actions/journal-actions'
+import {
+  ADD_JOURNAL_ENTRY,
+  SET_JOURNAL_ENTRIES, 
+  SET_PUSH_ENABLED, 
+  SET_PUSH_TIME,
+  SET_PROVIDER_CONNECTED
+} from '../actions/journal-actions'
 
 const initialState = {
   entries: [],
   loading: false,
   pushEnabled: true,
-  pushTime: null
+  pushTime: null,
+  providerConnected: 0
 }
 export default function journal(state = initialState, {type, payload}) {
   switch(type) {
@@ -30,6 +37,12 @@ export default function journal(state = initialState, {type, payload}) {
       return {
         ...state,
         pushTime: payload
+      }
+    case SET_PROVIDER_CONNECTED:
+      console.log('provider status', payload)
+      return {
+        ...state,
+        providerConnected: payload
       }
     default:
       return state

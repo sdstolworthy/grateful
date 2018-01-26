@@ -3,8 +3,10 @@ import firebase from 'firebase'
 import secrets from '../../secrets.js'
 import { AsyncStorage } from 'react-native'
 import { navigate } from '../redux/actions/nav-actions'
+import { setProviderConnected } from '../redux/actions/journal-actions'
 import { USER_REF, PROVIDER_USER_REF } from './firebase-constants'
 import { synchronizeDatabase } from './journal-services'
+import { db } from '../../App'
 
 export async function signInWithGoogleAsync () {
   try {
@@ -28,6 +30,18 @@ export async function signInWithGoogleAsync () {
     onAuthorize()
   } catch (e) {
     return { error: true }
+  }
+}
+
+async function setProviderChoice (choice) {
+  try {
+    db.transaction(tx => {
+      tx.executeSql('UPDATE settings SET providerChoice = ? WHERE id = 1', [choice], () => {
+        store.dispatch(setProviderConnected(choice))
+      })
+    })
+  } catch (e) {
+    console.log(e)
   }
 }
 
