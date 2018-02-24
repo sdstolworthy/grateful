@@ -12,6 +12,8 @@ export function signInWithGoogleAsync () {
   return Google.logInAsync({
     androidClientId: secrets.androidClient,
     iosClientId: secrets.iosClient,
+    androidStandaloneAppClientId: secrets.androidStandaloneClient,
+    iosStandaloneAppClientId: secrets.iosStandaloneClient,
     scopes: ['profile', 'email'],
   }).then(result => {
     const credential = {

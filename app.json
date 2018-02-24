@@ -10,11 +10,22 @@
     },
     "android": {
       "versionCode": 8,
-      "package" : "com.spencerds.gratitude"
+      "package" : "com.spencerds.gratitude",
+      "config" : {
+        "googleSignIn": {
+          "certificateHash": "E5E7D95F35519A94FE0618692D34CBB8BE9A027D",
+          "apiKey": "1042511937609-trroq1cm0l20om2j7ptokajsnj24elf4.apps.googleusercontent.com"
+        }
+      }
     },
     "ios": {
       "bundleIdentifier": "com.spencerds.gratitude",
-      "buildNumber": "7"
+      "buildNumber": "7",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.1042511937609-2audbp4amhi805o4e6qabvalhkp5f2vt"
+        }
+      }
     },
     "splash": {
       "image": "./assets/images/splash.png",
