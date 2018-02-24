@@ -1,16 +1,39 @@
 import React from "react";
-import { StatusBar, View, Text, TouchableWithoutFeedback, TouchableOpacity, Image, StyleSheet } from "react-native";
-import { Constants, LinearGradient } from 'expo'
-import { NavigationActions } from 'react-navigation'
-import { setProviderConnected, setLoadingStatus } from '../../redux/actions/journal-actions'
-import { signInWithGoogleAsync, loginFromStorage } from '../../services/auth-service'
+import {
+  StatusBar,
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+  Image,
+  StyleSheet
+} from "react-native";
+import {
+  Constants,
+  LinearGradient
+} from 'expo'
+import {
+  NavigationActions
+} from 'react-navigation'
+import {
+  setProviderConnected,
+  setLoadingStatus
+} from '../../redux/actions/journal-actions'
+import {
+  signInWithGoogleAsync,
+  loginFromStorage
+} from '../../services/auth-service'
 import StatusBumper from '../../components/StatusBumper'
-import { connect } from 'react-redux'
+import {
+  connect
+} from 'react-redux'
 import SignInWithGoogleNormal from '../../../assets/images/google_sign_in_normal.png'
 import TransparentG from '../../../assets/images/transparentBigG.png'
 class HomeScreen extends React.Component {
   static navigationOptions = {
-    headerStyle: { paddingTop: 50 },
+    headerStyle: {
+      paddingTop: 50
+    },
     title: 'Home'
   }
   constructor(props) {
@@ -21,21 +44,31 @@ class HomeScreen extends React.Component {
     }
   }
   componentWillUnmount () {
-    this.setState({hasLoaded: false})
+    this.setState({
+      hasLoaded: false
+    })
   }
-  componentWillMount() {
-    this.setState({hasLoaded: false})
+  componentWillMount () {
+    this.setState({
+      hasLoaded: false
+    })
     if (this.props.providerConnected !== null) {
-      this.setState({hasLoaded: true}, () => this.handleLoginSequence(this.props))
+      this.setState({
+        hasLoaded: true
+      }, () => this.handleLoginSequence(this.props))
     }
   }
   componentWillReceiveProps (nextProps) {
     if (nextProps.providerConnected !== null && !this.state.hasLoaded) {
-      this.setState({hasLoaded: true}, () => this.handleLoginSequence(nextProps))
+      this.setState({
+        hasLoaded: true
+      }, () => this.handleLoginSequence(nextProps))
     }
   }
   handleLoginSequence = (props = this.props) => {
-    const { providerConnected } = props
+    const {
+      providerConnected
+    } = props
     if (parseInt(providerConnected, 10) === 2) {
       try {
         loginFromStorage().then(user => {
@@ -59,6 +92,7 @@ class HomeScreen extends React.Component {
     }
   }
   login = () => {
+    this.props.toggleLoading(true)
     signInWithGoogleAsync().then(() => {
       this.resetToPrompt()
     }).catch(e => {
@@ -73,51 +107,66 @@ class HomeScreen extends React.Component {
     const navigationAction = NavigationActions.reset({
       index: 0,
       actions: [
-        NavigationActions.navigate({ routeName: 'Prompt' })
+        NavigationActions.navigate({
+          routeName: 'Prompt'
+        })
       ]
     })
     this.props.navigation.dispatch(navigationAction)
   }
   render () {
     const loginScreen = (
-      <LinearGradient
-        colors={['#4E7AC7', '#35478C']}
-        start={[.1, .1]}
-        end={[.3, 1]}
-        style={this.styles.container}
-      >
-        <Image
-          source={TransparentG}
+      <LinearGradient colors={
+        ['#4E7AC7', '#35478C']
+      }
+        start={
+          [.1, .1]
+        }
+        end={
+          [.3, 1]
+        }
+        style={
+          this.styles.container
+        } >
+        <Image source={TransparentG}
           style={this.styles.bigG}
           resizeMode={"contain"}
         />
-        <TouchableOpacity
-          onPress={this.login}
-        >
-          <Image
-            style={{
+        <TouchableOpacity onPress={this.login}>
+          <Image style={
+            {
               maxWidth: 250,
-            }}
+            }
+          }
             resizeMode="contain"
-            source={SignInWithGoogleNormal}
+            source={
+              SignInWithGoogleNormal
+            }
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={this.continueWithoutLoggingIn}>
-          <Text
-            style={this.styles.noLoginText}
-          >
+        <TouchableOpacity onPress={
+          this.continueWithoutLoggingIn
+        } >
+          <Text style={this.styles.noLoginText} >
             Continue without logging in
-          </Text>
-        </TouchableOpacity>
+      </Text>
+        </TouchableOpacity >
       </LinearGradient>
     )
-    const loadingScreen = (
-      <LinearGradient
-        colors={['#4E7AC7', '#35478C']}
-        start={[.1, .1]}
-        end={[.3, 1]}
-        style={this.styles.container}
-      />
+    const loadingScreen = (<
+      LinearGradient colors={
+        ['#4E7AC7', '#35478C']
+      }
+      start={
+        [.1, .1]
+      }
+      end={
+        [.3, 1]
+      }
+      style={
+        this.styles.container
+      }
+    />
     )
     return this.props.loading ? loadingScreen : loginScreen
   }

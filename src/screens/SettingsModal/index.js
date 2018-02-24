@@ -142,7 +142,9 @@ class SettingsModal extends Component {
         onRequestClose={this.props.handleClose}
         visible={this.props.visible}
       >
-        <View style={styles.container}>
+        <View style={styles.container}
+          collapsable={false}
+        >
           <View style={styles.menuItem}>
             <Text style={styles.menuText}>Push Notifications</Text>
             <Switch
@@ -238,7 +240,7 @@ styles = StyleSheet.create({
   }
 })
 
-mstp = ({Journals}, ownProps) => {
+mstp = ({ Journals }, ownProps) => {
   return {
     pushEnabled: Journals.pushEnabled,
     pushTime: Journals.pushTime,

@@ -155,6 +155,7 @@ class JournalFeed extends Component {
         </View>
         <ScrollView
           style={this.styles.scroll}
+          collapsable={false}
           contentContainerStyle={this.styles.innerView}
           onTouchStart={this.setEditButtonVisible}
           showsVerticalScrollIndicator={false}

@@ -193,6 +193,7 @@ class GratitudePrompt extends Component {
           ref={c => this.containerScroller = c}
           contentContainerStyle={this.styles.innerView}
           onPress={this.toggleKeyboard}
+          collapsable={false}
           onContentSizeChange={(contentWidth, contentHeight) => { this.containerScroller.scrollToEnd(true) }}
         >
           <View style={[this.styles.formGroup, { paddingTop: screenHeight / 5 }]}>
